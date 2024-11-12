@@ -1,26 +1,32 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Section from './components/Section';
+import Footer from './components/Footer';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+    <div>
+      <Navbar />
+      <Hero />
+      <Section title="Holistic and Personalized Curriculum" bgColor="bg-babyBlue">
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Every child is unique. We believe that every student deserves a personalized learning strategy tailored to their unique needs.
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      </Section>
+      <Section title="Behavioral Development" bgColor="bg-white">
+        <p>
+          Success is measured beyond classroom achievements. Good grades alone will not equip your child to face obstacles in the real world.
+        </p>
+      </Section>
+      <Section title="Hands-On and Take Home Materials" bgColor="bg-babyPink">
+        <p>
+          Science has proven, time and time again, that learning with a hands-on activity develops a deep, conceptual understanding.
+        </p>
+      </Section>
+      <Footer />
     </div>
   );
-}
+};
 
 export default App;
