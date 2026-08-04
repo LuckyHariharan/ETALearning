@@ -1,6 +1,10 @@
 import React from 'react';
 
-const Hero = () => {
+interface HeroProps {
+  onStart?: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onStart }) => {
   return (
     <section className="bg-white text-center py-20 px-4">
       <h1 className="text-4xl font-bold text-mainPink">
@@ -10,7 +14,10 @@ const Hero = () => {
         At Enhance to Advance, we pride ourselves on our exclusive tutoring program,
         ensuring individualized success beyond the classroom.
       </p>
-      <button className="mt-6 px-6 py-3 bg-mainPink text-white rounded hover:bg-mainBlue">
+      <button
+        onClick={() => onStart && onStart()}
+        className="mt-6 px-6 py-3 bg-mainPink text-white rounded hover:bg-mainBlue"
+      >
         Take Our 5-Minute Questionnaire
       </button>
     </section>
