@@ -185,15 +185,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                     <button className="text-sm text-mainBlue hover:underline">Add child</button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
                     {kids.map((kid) => (
-                      <div key={kid.id} className="bg-gray-50 p-4 rounded-lg border border-gray-100 flex flex-col sm:flex-row items-start gap-4">
+                      <div key={kid.id} className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100 flex flex-col sm:flex-row items-start gap-4 h-full">
                         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700 flex-shrink-0">{kid.name.charAt(0)}</div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium">{kid.name} <span className="text-xs text-gray-400">• {kid.age} yrs</span></div>
-                          <div className="text-xs text-gray-500">Last activity: 2 days ago</div>
 
-                          <div className="mt-3 grid grid-cols-2 gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">{kid.name} <span className="text-xs text-gray-400">• {kid.age} yrs</span></div>
+                          <div className="text-xs text-gray-500 truncate">Last activity: 2 days ago</div>
+
+                          <div className="mt-2 sm:mt-3 grid grid-cols-2 gap-3 text-sm">
                             <div>
                               <div className="text-xs text-gray-500">Remaining sessions</div>
                               <div className="text-lg font-semibold">{kid.remainingSessions}</div>
@@ -204,9 +205,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                             </div>
                           </div>
 
-                          <div className="mt-3">
+                          <div className="mt-2 sm:mt-3">
                             <div className="text-sm font-medium">Homework</div>
-                            <ul className="mt-2 space-y-2">
+                            <ul className="mt-2 space-y-2 text-sm">
                               {kid.homework.map((h) => (
                                 <li key={h.id} className="flex items-center gap-3">
                                   <input
@@ -223,7 +224,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                           </div>
                         </div>
 
-                        <div className="w-full sm:w-28 flex-shrink-0">
+                        <div className="w-full sm:w-28 flex-shrink-0 flex sm:flex-col items-start sm:items-end">
                           <div className="text-xs text-gray-500">Progress</div>
                           <div className="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
                             <div className="h-2 bg-mainBlue rounded-full" style={{ width: `${kid.progress}%` }} />
