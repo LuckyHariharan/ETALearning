@@ -73,13 +73,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
   }
 
   function handleCancel(session: { title: string; date: string; time: string }) {
-    // show an explicit confirmation explaining the 9AM rule, then open mail client
+    // Different confirmations for admin vs parent
+    if (userRole === 'admin') {
+      const adminMsg = `Admin: Are you sure you want to cancel this student's session? This will send an email to ${email} requesting cancellation for ${session.title} on ${session.date} at ${session.time}.`;
+      if (!window.confirm(adminMsg)) return;
+      const subject = encodeURIComponent('Cancel session (admin)');
+      const body = encodeURIComponent(`Please cancel the session scheduled on ${session.date} at ${session.time} - ${session.title}. Cancel requested by admin.`);
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      return;
+    }
+
+    // Parent/student flow: stronger messaging about 9AM rule
     const msg = `To cancel, you MUST cancel before 9:00 AM on the day of the session.\n\nThis will open your email client to send a message to ${email} requesting cancellation for:\n\n${session.title} on ${session.date} at ${session.time}\n\nDo you want to continue?`;
     if (window.confirm(msg)) {
       const subject = encodeURIComponent('Cancel session');
       const body = encodeURIComponent(`Please cancel my session scheduled on ${session.date} at ${session.time} - ${session.title}. I understand I must cancel by 9:00 AM on the day of the session.`);
       window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
     }
+  }
+
+  function handleNotifyParent() {
+    const msg = `This will contact the student/parent with an invoice for the upcoming payment of ${upcomingPayment.amount} due on ${upcomingPayment.dueDate}.\n\nDo you want to continue?`;
+    if (!window.confirm(msg)) return;
+    const subject = encodeURIComponent('Invoice: Upcoming payment');
+    const body = encodeURIComponent(`Please notify the student/parent about an upcoming payment of ${upcomingPayment.amount} due on ${upcomingPayment.dueDate}.`);
+    // For now send to admin address as placeholder; backend integration can send directly to parent email later
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   }
 
   // Payment dummy data
@@ -153,7 +172,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
             <div className="mt-2 text-lg font-medium">{upcomingPayment.amount}</div>
             <p className="text-xs text-gray-400 mt-1">Due {upcomingPayment.dueDate} • {upcomingPayment.method}</p>
             <div className="mt-3">
-              <button className="px-3 py-1 bg-mainBlue text-white rounded text-sm">Pay Now</button>
+              <button onClick={handleNotifyParent} className="px-3 py-1 bg-mainBlue text-white rounded text-sm">Notify Parent</button>
             </div>
           </div>
         </div>
@@ -161,7 +180,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="flex flex-col md:flex-row">
             {/* Tabs column */}
-            <nav className="flex md:flex-col w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-200 bg-gray-50">
+            <nav className="flex md:flex-col w-full md:w-1/4 border-b md:border-b-0 md:border-r border-gray-200 bg-gray-50">
               <button
                 className={`w-1/2 md:w-auto px-4 py-3 text-left ${tab === 'kids' ? 'bg-white text-mainBlue font-medium' : 'text-gray-700 hover:bg-gray-100'}`}
                 onClick={() => setTab('kids')}
@@ -177,17 +196,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
             </nav>
 
             {/* Content area */}
-            <div className="p-6 w-full md:w-2/3">
+            <div className="p-6 w-full md:w-3/4">
               {tab === 'kids' && (
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">My Kids</h3>
-                    <button className="text-sm text-mainBlue hover:underline">Add child</button>
+                    {userRole === 'admin' ? (
+                      <button className="text-sm text-mainBlue hover:underline">Add child</button>
+                    ) : (
+                      <div />
+                    )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
                     {kids.map((kid) => (
-                      <div key={kid.id} className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100 flex flex-col sm:flex-row items-start gap-4 h-full">
+                                        <div key={kid.id} style={{ minHeight: 140 }} className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100 flex flex-col sm:flex-row items-start gap-4 h-full">
                         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700 flex-shrink-0">{kid.name.charAt(0)}</div>
 
                         <div className="flex-1 min-w-0">
@@ -244,7 +267,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                     <div className="bg-white rounded-lg border border-dashed border-gray-200 flex items-center justify-center p-6 text-center text-gray-500">
                       <div>
                         <div className="mb-2">No profiles yet?</div>
-                        <button className="px-3 py-2 bg-mainBlue text-white rounded text-sm">Create a profile</button>
+                        {userRole === 'admin' ? (
+                          <button className="px-3 py-2 bg-mainBlue text-white rounded text-sm">Create a profile</button>
+                        ) : (
+                          <div className="text-xs text-gray-500">Contact admin to add a profile.</div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -268,7 +295,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                             <div className="text-xs text-gray-500 mt-1">Suitable for ages 4–6 · 8 weeks</div>
                             <div className="mt-3">
                               <button className="px-3 py-1 text-sm bg-mainBlue text-white rounded">View</button>
-                              <button className="px-3 py-1 text-sm ml-2 border rounded">Enroll</button>
+                              {userRole === 'admin' && <button className="px-3 py-1 text-sm ml-2 border rounded">Enroll</button>}
                             </div>
                           </div>
                         </div>
