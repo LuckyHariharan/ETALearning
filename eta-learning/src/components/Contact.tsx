@@ -6,14 +6,12 @@ const Contact: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
+  const [showThanks, setShowThanks] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For now simply open a mailto with the message prefilled — placeholder behaviour
-    const to = 'admin@etalearning.com';
-    const subject = encodeURIComponent('Contact form submission');
-    const body = encodeURIComponent(`Name: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}`);
-    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    // Fake confirmation popup instead of mailto
+    setShowThanks(true);
   };
 
   return (
@@ -50,6 +48,18 @@ const Contact: React.FC = () => {
           <button type="submit" className="px-4 py-2 bg-mainPink text-white rounded">Submit</button>
         </div>
       </form>
+
+      {showThanks && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
+            <h4 className="text-lg font-semibold mb-2">Thank you</h4>
+            <p className="text-sm text-gray-700 mb-4">Thank you for reaching out — we will get back to you. A confirmation email has been sent to you.</p>
+            <div className="flex justify-center">
+              <button onClick={() => setShowThanks(false)} className="px-4 py-2 bg-mainBlue text-white rounded">OK</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

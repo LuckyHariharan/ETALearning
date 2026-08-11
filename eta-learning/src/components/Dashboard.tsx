@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ChildModal from './ChildModal';
 
 type TabKey = 'kids' | 'programs';
 
@@ -57,6 +58,25 @@ const sampleSessions = [
 const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
   const [tab, setTab] = useState<TabKey>('kids');
   const [kids, setKids] = useState<Kid[]>(initialKids);
+  const [showChildModal, setShowChildModal] = useState(false);
+
+  function addChild(payload: { name: string; age: number; gender?: string; level?: string; remainingSessions?: number; progress?: number; notes?: string }) {
+    setKids((prev) => {
+      const nextId = prev.length ? Math.max(...prev.map((k) => k.id)) + 1 : 1;
+      return [
+        ...prev,
+        {
+          id: nextId,
+          name: payload.name,
+          age: payload.age,
+          progress: payload.progress ?? 0,
+          remainingSessions: payload.remainingSessions ?? 0,
+          level: payload.level ?? 'New learner',
+          homework: [],
+        },
+      ];
+    });
+  }
 
   const email = 'Admin@etalearning.com';
 
@@ -202,7 +222,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">My Kids</h3>
                     {userRole === 'admin' ? (
-                      <button className="text-sm text-mainBlue hover:underline">Add child</button>
+                      <button onClick={() => setShowChildModal(true)} className="text-sm text-mainBlue hover:underline">Add child</button>
                     ) : (
                       <div />
                     )}
@@ -268,13 +288,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                       <div>
                         <div className="mb-2">No profiles yet?</div>
                         {userRole === 'admin' ? (
-                          <button className="px-3 py-2 bg-mainBlue text-white rounded text-sm">Create a profile</button>
+                        <button onClick={() => setShowChildModal(true)} className="px-3 py-2 bg-mainBlue text-white rounded text-sm">Create a profile</button>
                         ) : (
                           <div className="text-xs text-gray-500">Contact admin to add a profile.</div>
                         )}
                       </div>
                     </div>
                   </div>
+
+                  <ChildModal
+                    open={showChildModal}
+                    onClose={() => setShowChildModal(false)}
+                    onSubmit={(c) => addChild({ name: c.name, age: c.age, gender: c.gender, level: c.level, remainingSessions: c.remainingSessions, progress: c.progress })}
+                  />
                 </div>
               )}
 
