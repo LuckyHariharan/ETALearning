@@ -228,27 +228,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch" style={{ gridAutoRows: '1fr' }}>
                     {kids.map((kid) => (
-                                        <div key={kid.id} style={{ minHeight: 140 }} className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100 flex flex-col sm:flex-row items-start gap-4 h-full">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700 flex-shrink-0">{kid.name.charAt(0)}</div>
+                      // Each card fills the available row height (gridAutoRows + h-full) so all cards match heights
+                      <div key={kid.id} style={{ minHeight: 150 }} className="bg-gray-50 p-2 sm:p-4 rounded-lg border border-gray-100 flex flex-col sm:flex-row h-full">
 
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">{kid.name} <span className="text-xs text-gray-400">• {kid.age} yrs</span></div>
-                          <div className="text-xs text-gray-500 truncate">Last activity: 2 days ago</div>
+                        {/* Avatar */}
+                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-lg font-semibold text-blue-700 flex-shrink-0">{kid.name.charAt(0)}</div>
 
-                          <div className="mt-2 sm:mt-3 grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                              <div className="text-xs text-gray-500">Remaining sessions</div>
-                              <div className="text-lg font-semibold">{kid.remainingSessions}</div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-gray-500">Current level</div>
-                              <div className="text-lg font-semibold">{kid.level}</div>
+                        {/* Main content: use flex-col and justify-between so bottom area (homework/progress) sticks to bottom */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between px-2">
+                          <div>
+                            <div className="font-medium truncate">{kid.name} <span className="text-xs text-gray-400">• {kid.age} yrs</span></div>
+                            <div className="text-xs text-gray-500 truncate">Last activity: 2 days ago</div>
+
+                            <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
+                              <div>
+                                <div className="text-xs text-gray-500">Remaining sessions</div>
+                                <div className="text-lg font-semibold">{kid.remainingSessions}</div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-gray-500">Current level</div>
+                                <div className="text-lg font-semibold">{kid.level}</div>
+                              </div>
                             </div>
                           </div>
 
-                          <div className="mt-2 sm:mt-3">
+                          <div className="mt-3">
                             <div className="text-sm font-medium">Homework</div>
                             <ul className="mt-2 space-y-2 text-sm">
                               {kid.homework.map((h) => (
@@ -267,12 +273,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                           </div>
                         </div>
 
-                        <div className="w-full sm:w-28 flex-shrink-0 flex sm:flex-col items-start sm:items-end">
-                          <div className="text-xs text-gray-500">Progress</div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
-                            <div className="h-2 bg-mainBlue rounded-full" style={{ width: `${kid.progress}%` }} />
+                        {/* Progress column: keep narrow and aligned to bottom on larger screens */}
+                        <div className="w-full sm:w-28 flex-shrink-0 flex flex-col justify-between items-start sm:items-end mt-3 sm:mt-0">
+                          <div>
+                            <div className="text-xs text-gray-500">Progress</div>
+                            <div className="w-full sm:w-24 bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                              <div className="h-2 bg-mainBlue rounded-full" style={{ width: `${kid.progress}%` }} />
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">{kid.progress}%</div>
                           </div>
-                          <div className="text-xs text-gray-600 mt-1">{kid.progress}%</div>
 
                           {userRole === 'admin' && (
                             <div className="mt-2">
