@@ -1,5 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ChildModal from './ChildModal';
+
+type ChildFormData = {
+  name: string;
+  age: number;
+  level?: string;
+  remainingSessions?: number;
+  progress?: number;
+  notes?: string;
+};
 
 type TabKey = 'kids' | 'programs';
 
@@ -59,8 +68,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
   const [tab, setTab] = useState<TabKey>('kids');
   const [kids, setKids] = useState<Kid[]>(initialKids);
   const [showChildModal, setShowChildModal] = useState(false);
+  const [editingKidId, setEditingKidId] = useState<number | null>(null);
 
-  function addChild(payload: { name: string; age: number; gender?: string; level?: string; remainingSessions?: number; progress?: number; notes?: string }) {
+  function addChild(payload: ChildFormData) {
     setKids((prev) => {
       const nextId = prev.length ? Math.max(...prev.map((k) => k.id)) + 1 : 1;
       return [
@@ -76,6 +86,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
         },
       ];
     });
+  }
+
+  function updateChild(id: number, payload: ChildFormData) {
+    setKids((prev) =>
+      prev.map((kid) =>
+        kid.id === id
+          ? {
+              ...kid,
+              name: payload.name,
+              age: payload.age,
+              progress: payload.progress ?? kid.progress,
+              remainingSessions: payload.remainingSessions ?? kid.remainingSessions,
+              level: payload.level ?? kid.level,
+            }
+          : kid
+      )
+    );
+  }
+
+  function openCreateModal() {
+    setEditingKidId(null);
+    setShowChildModal(true);
+  }
+
+  function openEditModal(kid: Kid) {
+    setEditingKidId(kid.id);
+    setShowChildModal(true);
   }
 
   const email = 'Admin@etalearning.com';
@@ -222,7 +259,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">My Kids</h3>
                     {userRole === 'admin' ? (
-                      <button onClick={() => setShowChildModal(true)} className="text-sm text-mainBlue hover:underline">Add child</button>
+                     <button onClick={openCreateModal} className="text-sm text-mainBlue hover:underline">Add child</button>
                     ) : (
                       <div />
                     )}
@@ -245,11 +282,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                             <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                               <div>
                                 <div className="text-xs text-gray-500">Remaining sessions</div>
-                                <div className="text-lg font-semibold">{kid.remainingSessions}</div>
+                                <div className="text-sm font-semibold">{kid.remainingSessions}</div>
                               </div>
                               <div>
                                 <div className="text-xs text-gray-500">Current level</div>
-                                <div className="text-lg font-semibold">{kid.level}</div>
+                                <div className="text-sm font-semibold">{kid.level}</div>
                               </div>
                             </div>
                           </div>
@@ -285,7 +322,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
 
                           {userRole === 'admin' && (
                             <div className="mt-2">
-                              <button className="text-xs px-2 py-1 border rounded">Edit</button>
+                              <button onClick={() => openEditModal(kid)} className="text-xs px-2 py-1 border rounded">Edit</button>
                             </div>
                           )}
                         </div>
@@ -297,7 +334,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                       <div>
                         <div className="mb-2">No profiles yet?</div>
                         {userRole === 'admin' ? (
-                        <button onClick={() => setShowChildModal(true)} className="px-3 py-2 bg-mainBlue text-white rounded text-sm">Create a profile</button>
+                        <button onClick={openCreateModal} className="px-3 py-2 bg-mainBlue text-white rounded text-sm">Create a profile</button>
                         ) : (
                           <div className="text-xs text-gray-500">Contact admin to add a profile.</div>
                         )}
@@ -307,8 +344,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
 
                   <ChildModal
                     open={showChildModal}
-                    onClose={() => setShowChildModal(false)}
-                    onSubmit={(c) => addChild({ name: c.name, age: c.age, gender: c.gender, level: c.level, remainingSessions: c.remainingSessions, progress: c.progress })}
+                    onClose={() => {
+                      setShowChildModal(false);
+                      setEditingKidId(null);
+                    }}
+                    mode={editingKidId !== null ? 'edit' : 'create'}
+                    initialData={editingKidId !== null ? kids.find((k) => k.id === editingKidId) ?? null : null}
+                    onSubmit={(c) => {
+                      if (editingKidId !== null) {
+                        updateChild(editingKidId, {
+                          name: c.name,
+                          age: c.age,
+                          level: c.level,
+                          remainingSessions: c.remainingSessions,
+                          progress: c.progress,
+                        });
+                      } else {
+                        addChild({
+                          name: c.name,
+                          age: c.age,
+                          level: c.level,
+                          remainingSessions: c.remainingSessions,
+                          progress: c.progress,
+                        });
+                      }
+                      setShowChildModal(false);
+                      setEditingKidId(null);
+                    }}
                   />
                 </div>
               )}

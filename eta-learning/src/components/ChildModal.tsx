@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ChildData {
   name: string;
   age: number | '';
-  gender: string;
   level?: string;
   remainingSessions?: number | '';
   progress?: number | '';
@@ -14,10 +13,31 @@ interface ChildModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (child: Omit<ChildData, 'age' | 'remainingSessions' | 'progress'> & { age: number; remainingSessions?: number; progress?: number }) => void;
+  initialData?: ChildData | null;
+  mode?: 'create' | 'edit';
 }
 
-const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit }) => {
-  const [form, setForm] = useState<ChildData>({ name: '', age: '', gender: '', level: '', remainingSessions: '', progress: '', notes: '' });
+const emptyForm = (): ChildData => ({ name: '', age: '', level: '', remainingSessions: '', progress: '', notes: '' });
+
+const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit, initialData, mode = 'create' }) => {
+  const [form, setForm] = useState<ChildData>(emptyForm());
+
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        setForm({
+          name: initialData.name || '',
+          age: initialData.age ?? '',
+          level: initialData.level || '',
+          remainingSessions: initialData.remainingSessions ?? '',
+          progress: initialData.progress ?? '',
+          notes: initialData.notes || '',
+        });
+      } else {
+        setForm(emptyForm());
+      }
+    }
+  }, [open, initialData]);
 
   if (!open) return null;
 
@@ -31,14 +51,13 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit }) => {
     const child = {
       name: form.name,
       age: Number(form.age),
-      gender: form.gender || 'Not specified',
       level: form.level || 'New learner',
       remainingSessions: form.remainingSessions === '' ? 0 : Number(form.remainingSessions),
       progress: form.progress === '' ? 0 : Number(form.progress),
       notes: form.notes || '',
     };
     onSubmit(child);
-    setForm({ name: '', age: '', gender: '', level: '', remainingSessions: '', progress: '', notes: '' });
+    setForm(emptyForm());
     onClose();
   }
 
@@ -47,7 +66,7 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit }) => {
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Create child profile</h3>
+            <h3 className="text-lg font-semibold">{mode === 'edit' ? 'Edit child profile' : 'Create child profile'}</h3>
             <button onClick={onClose} className="text-sm text-gray-500">Close</button>
           </div>
 
@@ -63,16 +82,7 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit }) => {
                 <input value={form.age} onChange={(e) => update('age', e.target.value === '' ? '' : Number(e.target.value))} type="number" min={1} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Gender</label>
-                <select value={form.gender} onChange={(e) => update('gender', e.target.value)} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2">
-                  <option value="">Select</option>
-                  <option value="Female">Female</option>
-                  <option value="Male">Male</option>
-                  <option value="Non-binary">Non-binary</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-              </div>
+     
             </div>
 
             <div>
@@ -86,12 +96,17 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit }) => {
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700">Progress (%)</label>
+              <input value={form.progress} onChange={(e) => update('progress', e.target.value === '' ? '' : Number(e.target.value))} type="number" min={0} max={100} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-gray-700">Notes</label>
               <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" rows={3} />
             </div>
 
             <div className="flex justify-end">
-              <button type="submit" className="px-4 py-2 bg-mainBlue text-white rounded">Create profile</button>
+              <button type="submit" className="px-4 py-2 bg-mainBlue text-white rounded">{mode === 'edit' ? 'Save changes' : 'Create profile'}</button>
             </div>
           </form>
         </div>
