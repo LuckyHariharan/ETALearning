@@ -6,20 +6,21 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ onStart }) => {
   return (
-    <section className="bg-white text-center py-20 px-4">
-      <h1 className="text-4xl font-bold text-mainPink">
-        ETA <span className="text-mainBlue">Motto</span> Here <span className="text-mainPink">ETA motto</span>
-      </h1>
-      <p className="mt-4 text-lg text-gray-700">
-        At Enhance to Advance, we pride ourselves on our exclusive tutoring program,
-        ensuring individualized success beyond the classroom.
-      </p>
-      <button
-        onClick={() => onStart && onStart()}
-        className="mt-6 px-6 py-3 bg-mainPink text-white rounded hover:bg-mainBlue"
-      >
-        Log-in/Sign-up
-      </button>
+    <section className="bg-white text-center py-20 px-4 animate-fade-in-up">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="text-4xl sm:text-5xl font-bold text-mainPink tracking-tight leading-tight">
+          ETA Montessori coaching for confident, joyful academic growth
+        </h1>
+        <p className="mt-5 text-lg text-gray-700 sm:text-xl">
+          Personalized learning pathways that combine Montessori methods with proven academic strategies, designed to build independence and real-world readiness.
+        </p>
+        <button
+          onClick={() => onStart && onStart()}
+          className="mt-8 inline-flex items-center justify-center rounded-full bg-mainPink px-8 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-mainBlue"
+        >
+          Start your journey
+        </button>
+      </div>
     </section>
   );
 };

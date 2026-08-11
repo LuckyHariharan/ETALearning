@@ -4,6 +4,7 @@ type TabKey = 'kids' | 'programs';
 
 interface DashboardProps {
   onBack?: () => void;
+  userRole?: 'admin' | 'parent' | undefined;
 }
 
 type HomeworkItem = {
@@ -25,43 +26,39 @@ type Kid = {
 const initialKids: Kid[] = [
   {
     id: 1,
-    name: 'Ava',
+    name: 'Anika',
     age: 6,
-    progress: 72,
-    remainingSessions: 6,
-    level: 'Beginner A1',
+    progress: 78,
+    remainingSessions: 8,
+    level: 'Montessori Foundations',
     homework: [
-      { id: 1, text: 'Practice vowel sounds', done: false },
-      { id: 2, text: 'Worksheet 3', done: true },
+      { id: 1, text: 'Practice letter sounds', done: false },
+      { id: 2, text: 'Complete counting tray', done: true },
     ],
   },
   {
     id: 2,
-    name: 'Noah',
+    name: 'Rohan',
     age: 8,
-    progress: 45,
-    remainingSessions: 3,
-    level: 'Early Reader B1',
+    progress: 64,
+    remainingSessions: 5,
+    level: 'Early Literacy Plus',
     homework: [
-      { id: 1, text: 'Read 5 pages', done: false },
+      { id: 1, text: 'Read a short story aloud', done: false },
     ],
   },
 ];
 
-const sampleNextSession = {
-  title: 'Letter Tracing',
-  date: 'Tomorrow',
-  time: '9:00 AM',
-  teacher: 'Ms. Priya',
-  past: false, // keeps intent of "past and upcoming"
-};
+const sampleSessions = [
+  { id: 1, title: 'Montessori Reading Lab', date: '2026-08-12', time: '09:00 AM', teacher: 'Ms. Priya', status: 'upcoming' },
+  { id: 2, title: 'Math Foundations', date: '2026-08-05', time: '10:00 AM', teacher: 'Mr. Lee', status: 'past' },
+];
 
-const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
   const [tab, setTab] = useState<TabKey>('kids');
   const [kids, setKids] = useState<Kid[]>(initialKids);
 
   const email = 'Admin@etalearning.com';
-  const cancelTooltip = 'Please cancel by 9AM on the day of the session.';
 
   function toggleHomework(kidId: number, hwId: number) {
     setKids((prev) =>
@@ -75,6 +72,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
     );
   }
 
+  function handleCancel(session: { title: string; date: string; time: string }) {
+    // show an explicit confirmation explaining the 9AM rule, then open mail client
+    const msg = `To cancel, you MUST cancel before 9:00 AM on the day of the session.\n\nThis will open your email client to send a message to ${email} requesting cancellation for:\n\n${session.title} on ${session.date} at ${session.time}\n\nDo you want to continue?`;
+    if (window.confirm(msg)) {
+      const subject = encodeURIComponent('Cancel session');
+      const body = encodeURIComponent(`Please cancel my session scheduled on ${session.date} at ${session.time} - ${session.title}. I understand I must cancel by 9:00 AM on the day of the session.`);
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    }
+  }
+
+  // Payment dummy data
+  const upcomingPayment = {
+    dueDate: '2026-08-20',
+    amount: '$120.00',
+    method: 'Visa ending in 4242',
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <div className="max-w-6xl mx-auto">
@@ -87,7 +101,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex flex-col text-right">
               <span className="text-xs text-gray-500">Welcome back,</span>
-              <span className="font-medium">Parent</span>
+              <span className="font-medium">{userRole === 'admin' ? 'Admin' : 'Parent'}</span>
             </div>
             {onBack && (
               <button
@@ -109,25 +123,38 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-4">
-            <h4 className="text-sm text-gray-500">Next Session (past and upcoming)</h4>
-            <div className="mt-2 text-xl font-medium">{sampleNextSession.title}</div>
-            <p className="text-xs text-gray-400 mt-1">{sampleNextSession.date}, {sampleNextSession.time} • {sampleNextSession.teacher}</p>
-            <div className="mt-3">
-              <a
-                href={`mailto:${email}?subject=${encodeURIComponent('Cancel session')}&body=${encodeURIComponent(`Please cancel my session scheduled on ${sampleNextSession.date} at ${sampleNextSession.time}.`)}`}
-                className="inline-block px-3 py-1 bg-red-600 text-white rounded text-sm hover:opacity-95"
-                title={cancelTooltip}
-              >
-                Cancel Session
-              </a>
-              <span className="ml-3 text-xs text-gray-400">(Click to email us to cancel)</span>
+            <h4 className="text-sm text-gray-500">Next Sessions</h4>
+            <div className="mt-2 space-y-2 text-sm text-gray-700">
+              {sampleSessions.map((s) => (
+                <div key={s.id} className={`flex items-start justify-between ${s.status === 'past' ? 'opacity-70' : ''}`}>
+                  <div>
+                    <div className="font-medium">{s.title}</div>
+                    <div className="text-xs text-gray-400">{s.date} • {s.time} • {s.teacher} {s.status === 'past' && <span className="ml-2 text-xs text-gray-500">(past)</span>}</div>
+                  </div>
+                  {s.status === 'upcoming' && (
+                    <div className="ml-4">
+                      <button
+                        onClick={() => handleCancel(s)}
+                        className="px-2 py-1 bg-red-600 text-white rounded text-sm"
+                        title="Must cancel before 9AM the day of"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+            <div className="mt-3 text-xs text-gray-400">Click cancel to open your email client. Please cancel before 9:00 AM the day of the session.</div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-4">
             <h4 className="text-sm text-gray-500">Upcoming Payment</h4>
-            <div className="mt-2 text-xl font-medium">Details coming soon</div>
-            <p className="text-xs text-gray-400 mt-1">You can add payment info here later.</p>
+            <div className="mt-2 text-lg font-medium">{upcomingPayment.amount}</div>
+            <p className="text-xs text-gray-400 mt-1">Due {upcomingPayment.dueDate} • {upcomingPayment.method}</p>
+            <div className="mt-3">
+              <button className="px-3 py-1 bg-mainBlue text-white rounded text-sm">Pay Now</button>
+            </div>
           </div>
         </div>
 
@@ -160,50 +187,54 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack }) => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {kids.map((kid) => (
-                      <div key={kid.id} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700">{kid.name.charAt(0)}</div>
-                          <div className="flex-1">
-                            <div className="font-medium">{kid.name} <span className="text-xs text-gray-400">• {kid.age} yrs</span></div>
-                            <div className="text-xs text-gray-500">Last activity: 2 days ago</div>
+                      <div key={kid.id} className="bg-gray-50 p-4 rounded-lg border border-gray-100 flex flex-col sm:flex-row items-start gap-4">
+                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl font-semibold text-blue-700 flex-shrink-0">{kid.name.charAt(0)}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">{kid.name} <span className="text-xs text-gray-400">• {kid.age} yrs</span></div>
+                          <div className="text-xs text-gray-500">Last activity: 2 days ago</div>
 
-                            <div className="mt-3 grid grid-cols-2 gap-3">
-                              <div>
-                                <div className="text-xs text-gray-500">Remaining sessions</div>
-                                <div className="text-lg font-semibold">{kid.remainingSessions}</div>
-                              </div>
-                              <div>
-                                <div className="text-xs text-gray-500">Current level</div>
-                                <div className="text-lg font-semibold">{kid.level}</div>
-                              </div>
+                          <div className="mt-3 grid grid-cols-2 gap-3">
+                            <div>
+                              <div className="text-xs text-gray-500">Remaining sessions</div>
+                              <div className="text-lg font-semibold">{kid.remainingSessions}</div>
                             </div>
-
-                            <div className="mt-3">
-                              <div className="text-sm font-medium">Homework</div>
-                              <ul className="mt-2 space-y-2">
-                                {kid.homework.map((h) => (
-                                  <li key={h.id} className="flex items-center gap-3">
-                                    <input
-                                      type="checkbox"
-                                      checked={h.done}
-                                      onChange={() => toggleHomework(kid.id, h.id)}
-                                      className="w-4 h-4"
-                                    />
-                                    <span className={`${h.done ? 'line-through text-gray-400' : 'text-gray-700'}`}>{h.text}</span>
-                                  </li>
-                                ))}
-                                {kid.homework.length === 0 && <li className="text-xs text-gray-400">No homework assigned</li>}
-                              </ul>
+                            <div>
+                              <div className="text-xs text-gray-500">Current level</div>
+                              <div className="text-lg font-semibold">{kid.level}</div>
                             </div>
                           </div>
 
-                          <div className="w-28">
-                            <div className="text-xs text-gray-500">Progress</div>
-                            <div className="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
-                              <div className="h-2 bg-mainBlue rounded-full" style={{ width: `${kid.progress}%` }} />
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">{kid.progress}%</div>
+                          <div className="mt-3">
+                            <div className="text-sm font-medium">Homework</div>
+                            <ul className="mt-2 space-y-2">
+                              {kid.homework.map((h) => (
+                                <li key={h.id} className="flex items-center gap-3">
+                                  <input
+                                    type="checkbox"
+                                    checked={h.done}
+                                    onChange={() => toggleHomework(kid.id, h.id)}
+                                    className="w-4 h-4"
+                                  />
+                                  <span className={`${h.done ? 'line-through text-gray-400' : 'text-gray-700'}`}>{h.text}</span>
+                                </li>
+                              ))}
+                              {kid.homework.length === 0 && <li className="text-xs text-gray-400">No homework assigned</li>}
+                            </ul>
                           </div>
+                        </div>
+
+                        <div className="w-full sm:w-28 flex-shrink-0">
+                          <div className="text-xs text-gray-500">Progress</div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                            <div className="h-2 bg-mainBlue rounded-full" style={{ width: `${kid.progress}%` }} />
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">{kid.progress}%</div>
+
+                          {userRole === 'admin' && (
+                            <div className="mt-2">
+                              <button className="text-xs px-2 py-1 border rounded">Edit</button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface LoginProps {
-  onLogin: () => void;
+  // onLogin may accept an optional role so App can render admin vs parent dashboard
+  onLogin: (role?: 'admin' | 'parent') => void;
   onBack?: () => void;
+  preselectedRole?: 'admin' | 'parent' | undefined;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onBack, preselectedRole }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (preselectedRole) {
+      // if role was preselected (from Navbar), highlight it or auto-select — for now keep user on login screen
+    }
+  }, [preselectedRole]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +31,21 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
           {onBack && (
             <button onClick={onBack} className="text-sm text-gray-500 hover:text-gray-700">Back</button>
           )}
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          <button
+            onClick={() => onLogin('admin')}
+            className="py-2 px-3 border rounded bg-white hover:bg-gray-50 text-sm font-medium"
+          >
+            Login as Admin
+          </button>
+          <button
+            onClick={() => onLogin('parent')}
+            className="py-2 px-3 border rounded bg-white hover:bg-gray-50 text-sm font-medium"
+          >
+            Login as Parent / Student
+          </button>
         </div>
 
         <form onSubmit={submit} className="space-y-4">
@@ -64,7 +87,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
 
         <div className="mt-2 text-center">
           <button
-            onClick={onLogin}
+            onClick={() => onLogin()}
             className="text-sm text-gray-500 hover:text-gray-700"
           >
             Continue as guest
