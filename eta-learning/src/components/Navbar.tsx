@@ -35,8 +35,7 @@ const Navbar = () => {
         <a href="#faq" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">FAQ</a>
         <a href="#contact" className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 flex items-center">Contact</a>
 
-        <button onClick={() => goRoute('login', 'admin')} className="text-sm text-gray-700 px-3 py-2 border rounded hover:bg-gray-50">Admin Login</button>
-        <button onClick={() => goRoute('login', 'parent')} className="text-sm text-gray-700 px-3 py-2 border rounded hover:bg-gray-50">Parent / Student Login</button>
+        <button onClick={() => goRoute('login')} className="text-sm text-gray-700 px-3 py-2 border rounded hover:bg-gray-50">Login</button>
       </div>
 
       {/* Mobile hamburger */}
@@ -72,8 +71,7 @@ const Navbar = () => {
               <a href="#contact" onClick={() => setOpen(false)} className="py-3 px-2 bg-pink-600 text-white rounded inline-block text-center">Contact</a>
 
               <div className="border-t text-sm pt-4 mt-4">
-                              <button onClick={() => goRoute('login', 'admin')} className="w-full text-left py-3 px-2 border rounded mb-2">Admin Login</button>
-                              <button onClick={() => goRoute('login', 'parent')} className="w-full text-left py-3 px-2 border rounded">Parent / Student Login</button>
+                <button onClick={() => goRoute('login')} className="w-full text-left py-3 px-2 border rounded">Login</button>
               </div>
 
               <div className="mt-6 text-sm text-gray-500">© ETA Learning</div>
