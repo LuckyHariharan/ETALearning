@@ -7,7 +7,7 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ onStart, onQuestionnaire }) => {
   return (
-    <section className="bg-white text-center py-16 px-4 animate-fade-in-up">
+    <section className="bg-white text-center h-max py-24 lg:py-60 px-4 animate-fade-in-up">
       <div className="mx-auto max-w-4xl">
         <h1 className="text-4xl sm:text-5xl font-bold text-mainPink tracking-tight leading-tight">
           ETA Learning
