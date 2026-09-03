@@ -31,9 +31,10 @@ const Navbar = () => {
       {/* Desktop links */}
       <div className="hidden md:flex items-center gap-4 ml-auto h-full">
         <a href="#home" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Home</a>
-        <a href="#programs" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Programs</a>
+        <a href="#programs" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Programs + Plans</a>
+        <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=eta+learning" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Testimonials</a>
         <a href="#faq" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">FAQ</a>
-        <a href="#contact" className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 flex items-center">Contact</a>
+        <a href="#contact" className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-mainBlue flex items-center">Contact</a>
 
         <button onClick={() => goRoute('login')} className="text-sm text-gray-700 px-3 py-2 border rounded hover:bg-gray-50">Login</button>
       </div>
@@ -66,7 +67,8 @@ const Navbar = () => {
 
             <nav className="flex flex-col gap-4 text-lg text-gray-900">
               <a href="#home" onClick={() => setOpen(false)} className="py-3 px-2">Home</a>
-              <a href="#programs" onClick={() => setOpen(false)} className="py-3 px-2">Programs</a>
+              <a href="#programs" onClick={() => setOpen(false)} className="py-3 px-2">Programs + Plans</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=eta+learning" onClick={() => setOpen(false)} className="py-3 px-2">Testimonials</a>
               <a href="#faq" onClick={() => setOpen(false)} className="py-3 px-2">FAQ</a>
               <a href="#contact" onClick={() => setOpen(false)} className="py-3 px-2 bg-pink-600 text-white rounded inline-block text-center">Contact</a>
 

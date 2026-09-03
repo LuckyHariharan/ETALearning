@@ -8,6 +8,8 @@ import Dashboard from './components/Dashboard';
 import Contact from './components/Contact';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
+import Programs from './components/Programs';
+import Questionnaire from './components/Questionnaire';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<'home' | 'login' | 'dashboard'>('home');
@@ -33,6 +35,7 @@ const App: React.FC = () => {
     setRoute('dashboard');
   };
   const goHome = () => setRoute('home');
+  const [questionnaireOpen, setQuestionnaireOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -40,7 +43,24 @@ const App: React.FC = () => {
 
       {route === 'home' && (
         <>
-          <Hero onStart={() => goToLogin()} />
+          <Hero onStart={() => goToLogin()} onQuestionnaire={() => setQuestionnaireOpen(true)} />
+
+          {/* Proof Strip */}
+          <section className="bg-mainBlue py-6 px-4">
+            <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-4 text-white text-sm font-medium">
+              <span>18 months–18 years+</span>
+              <span className="hidden sm:inline">•</span>
+              <span>3:1 student-to-tutor ratio</span>
+              <span className="hidden sm:inline">•</span>
+              <span>Take-home materials included</span>
+              <span className="hidden sm:inline">•</span>
+              <span>Parent portal</span>
+              <span className="hidden sm:inline">•</span>
+              <span>In-person tutoring</span>
+              <span className="hidden sm:inline">•</span>
+              <span>Online tutoring (7+)</span>
+            </div>
+          </section>
 
           <Section title="ETA Program Packages" bgColor="bg-white">
             <div id="programs" className="flex justify-center">
@@ -51,6 +71,8 @@ const App: React.FC = () => {
               />
             </div>
           </Section>
+
+          <Programs />
 
           <Section title="Holistic and Personalized Curriculum" bgColor="bg-babyBlue">
             <p>
@@ -82,6 +104,7 @@ const App: React.FC = () => {
       {route === 'dashboard' && <Dashboard onBack={goHome} userRole={userRole} />}
 
       <Footer />
+      <Questionnaire open={questionnaireOpen} onClose={() => setQuestionnaireOpen(false)} />
     </div>
   );
 };

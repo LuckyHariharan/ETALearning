@@ -7,28 +7,36 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
-    question: "What ages do you work with?",
-    answer: "We support learners from ages 3 to 14, offering tailored programs for early childhood through middle school. Each program is designed to match developmental stages and learning needs."
+    question: "What is Montessori-based tutoring?",
+    answer: "Our tutoring approach incorporates Montessori principles and Montessori materials into the program. This design particularly shapes children's behaviour, discipline, independence, focus and approach to learning.\n\nMontessori materials and hands-on activities engage multiple areas of the brain through hands-on, visual, and tactile activities, offering an interactive alternative to traditional pen-and-paper learning. These methods promote deeper conceptual understanding and retention and can be particularly beneficial for neurodivergent learners. Many parents even choose to purchase these beloved materials for home use, reinforcing learning and making homework more fun!"
   },
   {
-    question: "How are sessions structured?",
-    answer: "Our sessions combine direct instruction, hands-on Montessori activities, and independent practice. Each learner follows a personalized plan that adapts to their pace, interests, and goals."
+    question: "What ages and grade levels do you work with?",
+    answer: "ETA supports learners 18 months to 18 years, from toddlers through high school. Our mixed-age classrooms encourage leadership and role-modeling in older students while providing positive peer learning for younger children.\n\nYoung children must be potty trained or wear a diaper during sessions."
   },
   {
-    question: "Do you offer group or one-on-one sessions?",
-    answer: "We offer both! One-on-one sessions provide maximum personalization, while our small group sessions (3-5 students) encourage peer learning and social development. You can choose based on your child's needs."
+    question: "How do you personalize tutoring for each child?",
+    answer: "Every child begins with an enrollment assessment to identify their strengths, areas of need, and learning gaps. We then create a personalized curriculum. Every session, lesson plans and homework are modified based on each child's progression and needs. Ongoing formal assessments allow us to track progress and tailor plans as they grow.\n\nNo two children follow the same program."
   },
   {
-    question: "How do you track my child's progress?",
-    answer: "We use regular assessments, observation notes, and milestone tracking to monitor progress. Parents receive detailed reports and are invited to quarterly meetings to discuss their child's development."
+    question: "Can you support both struggling and advanced learners?",
+    answer: "Yes. The balance of enhancing and advancing is at the heart of our approach—and is why our enrollment assessment is vital to build the student's curriculum.\n\nThe average ETA student is introduced to concepts up to two grade levels ahead, while filling the gaps in their foundation."
   },
   {
-    question: "What subjects do you cover?",
-    answer: "We cover a comprehensive range including literacy, numeracy, science, social studies, and executive functioning skills. Our Montessori-inspired approach ensures a well-rounded educational experience."
+    question: "How do you assess progress and communicate with parents?",
+    answer: "Our 3:1 student-to-teacher ratio allows us to closely observe learning supported with homework review, and formal assessments.\n\nParents receive verbal updates and written session reports after every session, available 24/7. Our system also provides 24/7 access to financial account information and records for added transparency."
   },
   {
-    question: "How do I get started?",
-    answer: "Getting started is easy! Simply reach out through our contact form or give us a call. We'll schedule a free consultation to understand your child's strengths, interests, and learning goals, then recommend the best program for your family."
+    question: "Does my child need to attend a Montessori school?",
+    answer: "No. Our Montessori-inspired approach is designed to make the benefits of Montessori learning more accessible to families, regardless of the type of school their child attends.\n\nStudents from non-Montessori schools benefit from the alternative approach to learning, building confidence, independence, and comfort in their school classroom. Children who attend Montessori schools may especially benefit from the familiarity and overlap between our approach and their classroom experience."
+  },
+  {
+    question: "How often should my child attend and is homework mandatory?",
+    answer: "We recommend two sessions per week with regular homework to maximize reinforcement, retention, and progress. This is the foundation of our program and is designed to provide consistent practice between sessions.\n\nOur experience shows clear, efficient and consistent results when families follow our recommended regimens."
+  },
+  {
+    question: "What is the cancellation or rescheduling policy?",
+    answer: "Cancellations made after 9:00 AM on the day of a session will be charged in full. No exceptions.\n\nMake-up sessions can be booked at any time by contacting admin."
   }
 ];
 
