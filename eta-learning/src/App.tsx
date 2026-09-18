@@ -65,7 +65,7 @@ const App: React.FC = () => {
           <Section title="ETA Program Packages" bgColor="bg-white">
             <div id="programs" className="flex justify-center">
               <img
-                src={`${process.env.PUBLIC_URL}/ETA-programs.webp`}
+                src={`${process.env.PUBLIC_URL}/eta-programs.webp`}
                 alt="ETA Learning Program Packages"
                 className="max-w-full rounded-xl shadow-lg"
               />
