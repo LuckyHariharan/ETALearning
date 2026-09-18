@@ -9,7 +9,7 @@ const Hero: React.FC<HeroProps> = ({ onStart, onQuestionnaire }) => {
   return (
     <section className="bg-white text-center h-max py-24 lg:py-60 px-4 animate-fade-in-up">
       <div className="mx-auto max-w-4xl">
-        <h1 className="text-4xl sm:text-5xl font-bold text-mainPink tracking-tight leading-tight">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-mainPink tracking-tight leading-tight">
           ETA Learning
         </h1>
         <p className="mt-3 text-xl sm:text-2xl font-semibold text-black">

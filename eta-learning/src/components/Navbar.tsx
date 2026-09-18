@@ -57,7 +57,7 @@ const Navbar = () => {
 
       {/* Mobile menu overlay: full-screen white panel to avoid showing underlying header */}
       {open && (
-        <div className="text-sm md:hidden bg-white">
+        <div className="text-sm md:hidden bg-white overflow-y-auto max-h-[calc(100vh-5rem)]">
           <div className="h-80" /> {/* spacer so content starts below the header area */}
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
