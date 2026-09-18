@@ -10,6 +10,7 @@ import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import Programs from './components/Programs';
 import Questionnaire from './components/Questionnaire';
+import ImageModal from './components/ImageModal';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<'home' | 'login' | 'dashboard'>('home');
@@ -36,6 +37,7 @@ const App: React.FC = () => {
   };
   const goHome = () => setRoute('home');
   const [questionnaireOpen, setQuestionnaireOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -63,12 +65,20 @@ const App: React.FC = () => {
           </section>
 
           <Section title="ETA Program Packages" bgColor="bg-white">
-            <div id="programs" className="flex justify-center">
-              <img
-                src={`${process.env.PUBLIC_URL}/eta-programs.webp`}
-                alt="ETA Learning Program Packages"
-                className="max-w-full rounded-xl shadow-lg"
-              />
+            <div id="programs" className="w-full -mx-2 sm:-mx-6 lg:-mx-10 px-2 sm:px-6 lg:px-10 py-8 sm:py-12">
+              <button
+                type="button"
+                onClick={() => setImageModalOpen(true)}
+                aria-label="View ETA Learning Program Packages in fullscreen"
+                className="group block mx-auto w-full max-w-6xl cursor-pointer"
+              >
+                <img
+                  src={`${process.env.PUBLIC_URL}/eta-programs.webp`}
+                  alt="ETA Learning Program Packages"
+                  loading="lazy"
+                  className="w-full h-auto rounded-2xl shadow-xl ring-1 ring-black/5 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-[1.01] group-hover:shadow-2xl hover:scale-[1.005]"
+                />
+              </button>
             </div>
           </Section>
 
@@ -105,6 +115,14 @@ const App: React.FC = () => {
 
       <Footer />
       <Questionnaire open={questionnaireOpen} onClose={() => setQuestionnaireOpen(false)} />
+      {route === 'home' && (
+        <ImageModal
+          src={`${process.env.PUBLIC_URL}/eta-programs.webp`}
+          alt="ETA Learning Program Packages"
+          open={imageModalOpen}
+          onClose={() => setImageModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
