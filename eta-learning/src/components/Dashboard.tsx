@@ -215,7 +215,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
               Payment Due: <span className="font-medium text-gray-700">{formatDueDate(upcomingPayment.dueDate)}</span>
             </p>
             <p className="text-xs text-gray-400 mt-3 leading-relaxed">
-              If you have questions about attendance or payment history, please refer to your Google Account Sheet.
+              If you have questions about attendance or payment history, please refer to your{' '}
+              <a
+                href="https://docs.google.com/spreadsheets/d/1fG9EIasT_nH08zDhh0TY9D4CakZKupkkAlkPgwQ7NDM/edit?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-mainBlue hover:underline"
+              >
+                Account Sheet
+              </a>
+              .
             </p>
             <a
               href={`mailto:${paymentEmail}?subject=${encodeURIComponent('ETA Learning Payment')}`}
@@ -225,6 +234,100 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
             </a>
           </div>
 
+        </div>
+
+        {/* A+ Student Resources – public default data for A+ students */}
+        <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+          {/* Section header */}
+          <div className="px-4 md:px-5 py-4 bg-gradient-to-r from-blue-50 to-pink-50 border-b border-gray-100">
+            <div className="flex items-center gap-2 mb-1">
+              <svg className="w-5 h-5 text-mainBlue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">A+ Student Resources</h3>
+              <span className="ml-auto text-[10px] font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Public – No Login Required</span>
+            </div>
+            <p className="text-xs text-gray-500">
+              Default data shared with all A+ students. Click any card to open in Google Drive.
+            </p>
+          </div>
+
+          {/* Resource cards */}
+          <div className="p-4 md:p-5 grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+
+            {/* Account Sheet */}
+            <a
+              href="https://docs.google.com/spreadsheets/d/1fG9EIasT_nH08zDhh0TY9D4CakZKupkkAlkPgwQ7NDM/edit?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:border-mainBlue/40 hover:shadow-md transition-all"
+            >
+              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mb-3 group-hover:bg-green-200 transition-colors">
+                <svg className="w-5 h-5 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="font-semibold text-sm text-gray-900 group-hover:text-mainBlue transition-colors">Account Sheet</div>
+              <div className="text-xs text-gray-500 mt-1 leading-relaxed">
+                Session schedule, attendance &amp; payment history for your A+ student.
+              </div>
+              <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                Open Spreadsheet
+                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5-5m5 5V6m0 5l-5 5" />
+                </svg>
+              </div>
+            </a>
+
+            {/* Student Report */}
+            <a
+              href="https://docs.google.com/document/d/1A-OyLANjBAY-J3PC20dpyGiOQUjvj5auMRxEous3xcg/edit?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:border-mainBlue/40 hover:shadow-md transition-all"
+            >
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
+                <svg className="w-5 h-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div className="font-semibold text-sm text-gray-900 group-hover:text-mainBlue transition-colors">Student Report</div>
+              <div className="text-xs text-gray-500 mt-1 leading-relaxed">
+                Detailed progress report covering skills, behavior &amp; achievements.
+              </div>
+              <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-blue-700">
+                View Report
+                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5-5m5 5V6m0 5l-5 5" />
+                </svg>
+              </div>
+            </a>
+
+            {/* Study Materials */}
+            <a
+              href="https://drive.google.com/drive/folders/1sbupL0dnyr51qcJRI5Npe5XcxM962a3L?usp=drive_link"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:border-mainBlue/40 hover:shadow-md transition-all"
+            >
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mb-3 group-hover:bg-amber-200 transition-colors">
+                <svg className="w-5 h-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v10a2 2 0 01-2 2H5z" />
+                </svg>
+              </div>
+              <div className="font-semibold text-sm text-gray-900 group-hover:text-mainBlue transition-colors">Study Materials</div>
+              <div className="text-xs text-gray-500 mt-1 leading-relaxed">
+                Homework worksheets, activity packs &amp; supplementary reading for A+ students.
+              </div>
+              <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-amber-700">
+                Browse Folder
+                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5-5m5 5V6m0 5l-5 5" />
+                </svg>
+              </div>
+            </a>
+
+          </div>
         </div>
 
         {/* Tabs panel */}
@@ -292,15 +395,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                         {/* Action buttons */}
                         <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100">
                           <a
-                            href="#hw-pdf"
+                            href="https://drive.google.com/drive/folders/1sbupL0dnyr51qcJRI5Npe5XcxM962a3L?usp=drive_link"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1 text-center px-3 py-1.5 text-xs bg-mainPink text-white rounded hover:bg-pink-700 transition-colors"
                           >
-                            HW PDF
+                            Study Materials
                           </a>
                           <a
-                            href="#session-report"
+                            href="https://docs.google.com/document/d/1A-OyLANjBAY-J3PC20dpyGiOQUjvj5auMRxEous3xcg/edit?usp=sharing"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1 text-center px-3 py-1.5 text-xs bg-mainBlue text-white rounded hover:bg-mainBlue/80 transition-colors"

@@ -8,6 +8,37 @@ const Navbar = () => {
     setOpen(false);
   };
 
+  // Navigate to home route, then scroll to the given section anchor.
+  // If already on home, just scroll immediately.
+  const goHome = (anchor: string) => {
+    setOpen(false);
+    const routeFn = (window as any).setAppRoute;
+
+    // Determine if we are already on the home route by checking the current
+    // document body for the Hero/Hero section which only renders on home.
+    const onHome = !!document.querySelector('[data-route="home"], #programs, #faq, #contact, #testimonials');
+
+    if (onHome) {
+      // Already on home – just scroll
+      const el = document.getElementById(anchor);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      // Switch to home first, then scroll after React re-renders
+      if (routeFn) routeFn('home');
+      // Wait two rAFs: first for state update, second for paint
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const el = document.getElementById(anchor);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+    }
+  };
+
   // prevent background scroll when menu is open
   useEffect(() => {
     if (open) {
@@ -34,11 +65,11 @@ const Navbar = () => {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-4 ml-auto h-full">
-          <a href="#home" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Home</a>
-          <a href="#programs" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Programs + Plans</a>
-          <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=eta+learning" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Testimonials</a>
-          <a href="#faq" className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">FAQ</a>
-          <a href="#contact" className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-mainBlue flex items-center">Contact</a>
+          <button onClick={() => goHome('home')} className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Home</button>
+          <button onClick={() => goHome('programs')} className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Programs + Plans</button>
+          <button onClick={() => goHome('testimonials')} className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">Testimonials</button>
+          <button onClick={() => goHome('faq')} className="text-gray-800 hover:text-mainBlue flex items-center h-full px-2">FAQ</button>
+          <button onClick={() => goHome('contact')} className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-mainBlue flex items-center">Contact</button>
           <button onClick={() => goRoute('login')} className="text-sm text-gray-700 px-3 py-2 border rounded hover:bg-gray-50">Login</button>
         </div>
 
@@ -66,12 +97,8 @@ const Navbar = () => {
       {open && (
         <div className="md:hidden fixed inset-0 z-30 bg-white overflow-y-auto pt-20">
           <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <img
-                src={`${process.env.PUBLIC_URL}/Short.png`}
-                alt="ETA logo"
-                className="h-10 w-auto"
-              />
+            {/* Header row – logo removed, keep Close button only */}
+            <div className="flex items-center justify-end mb-6">
               <button
                 onClick={() => setOpen(false)}
                 className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1"
@@ -81,21 +108,13 @@ const Navbar = () => {
             </div>
 
             <nav className="flex flex-col gap-1 text-lg text-gray-900">
-              <a href="#home" onClick={() => setOpen(false)} className="py-3 px-3 rounded hover:bg-gray-50">Home</a>
-              <a href="#programs" onClick={() => setOpen(false)} className="py-3 px-3 rounded hover:bg-gray-50">Programs + Plans</a>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://www.google.com/search?q=eta+learning"
-                onClick={() => setOpen(false)}
-                className="py-3 px-3 rounded hover:bg-gray-50"
-              >
-                Testimonials
-              </a>
-              <a href="#faq" onClick={() => setOpen(false)} className="py-3 px-3 rounded hover:bg-gray-50">FAQ</a>
-              <a href="#contact" onClick={() => setOpen(false)} className="py-3 px-3 bg-pink-600 text-white rounded text-center">
+              <button onClick={() => goHome('home')} className="text-left py-3 px-3 rounded hover:bg-gray-50">Home</button>
+              <button onClick={() => goHome('programs')} className="text-left py-3 px-3 rounded hover:bg-gray-50">Programs + Plans</button>
+              <button onClick={() => goHome('testimonials')} className="text-left py-3 px-3 rounded hover:bg-gray-50">Testimonials</button>
+              <button onClick={() => goHome('faq')} className="text-left py-3 px-3 rounded hover:bg-gray-50">FAQ</button>
+              <button onClick={() => goHome('contact')} className="text-left py-3 px-3 bg-pink-600 text-white rounded">
                 Contact
-              </a>
+              </button>
 
               <div className="border-t mt-4 pt-4">
                 <button
