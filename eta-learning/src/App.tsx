@@ -100,8 +100,10 @@ const App: React.FC = () => {
             </p>
           </Section>
 
-          {/* Contact section anchored by #contact */}
-          <Testimonials />
+          {/* Testimonials anchored by #testimonials */}
+          <div id="testimonials">
+            <Testimonials />
+          </div>
           <FAQ />
           <div id="contact" className="mt-8">
             <Contact />
