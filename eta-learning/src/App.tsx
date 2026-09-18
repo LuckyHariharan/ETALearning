@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
+import { useState, useEffect } from 'react';
 import Hero from './components/Hero';
 import Section from './components/Section';
 import Footer from './components/Footer';
 import Login from './components/Login';
-import Dashboard from './components/Dashboard';
 import Contact from './components/Contact';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import Programs from './components/Programs';
 import Questionnaire from './components/Questionnaire';
 import ImageModal from './components/ImageModal';
+import Navbar from './components/Navbar';
+import Dashboard from './components/Dashboard';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<'home' | 'login' | 'dashboard'>('home');
@@ -113,7 +113,7 @@ const App: React.FC = () => {
 
       {route === 'dashboard' && <Dashboard onBack={goHome} userRole={userRole} />}
 
-      <Footer />
+      {route === 'home' && <Footer />}
       <Questionnaire open={questionnaireOpen} onClose={() => setQuestionnaireOpen(false)} />
       {route === 'home' && (
         <ImageModal

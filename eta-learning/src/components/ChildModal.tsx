@@ -5,19 +5,17 @@ interface ChildData {
   age: number | '';
   level?: string;
   remainingSessions?: number | '';
-  progress?: number | '';
-  notes?: string;
 }
 
 interface ChildModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (child: Omit<ChildData, 'age' | 'remainingSessions' | 'progress'> & { age: number; remainingSessions?: number; progress?: number }) => void;
+  onSubmit: (child: { name: string; age: number; level?: string; remainingSessions?: number }) => void;
   initialData?: ChildData | null;
   mode?: 'create' | 'edit';
 }
 
-const emptyForm = (): ChildData => ({ name: '', age: '', level: '', remainingSessions: '', progress: '', notes: '' });
+const emptyForm = (): ChildData => ({ name: '', age: '', level: '', remainingSessions: '' });
 
 const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit, initialData, mode = 'create' }) => {
   const [form, setForm] = useState<ChildData>(emptyForm());
@@ -30,8 +28,6 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit, initia
           age: initialData.age ?? '',
           level: initialData.level || '',
           remainingSessions: initialData.remainingSessions ?? '',
-          progress: initialData.progress ?? '',
-          notes: initialData.notes || '',
         });
       } else {
         setForm(emptyForm());
@@ -53,8 +49,6 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit, initia
       age: Number(form.age),
       level: form.level || 'New learner',
       remainingSessions: form.remainingSessions === '' ? 0 : Number(form.remainingSessions),
-      progress: form.progress === '' ? 0 : Number(form.progress),
-      notes: form.notes || '',
     };
     onSubmit(child);
     setForm(emptyForm());
@@ -82,31 +76,21 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit, initia
                 <input value={form.age} onChange={(e) => update('age', e.target.value === '' ? '' : Number(e.target.value))} type="number" min={1} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
               </div>
 
-     
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Remaining sessions</label>
+                <input value={form.remainingSessions} onChange={(e) => update('remainingSessions', e.target.value === '' ? '' : Number(e.target.value))} type="number" min={0} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Level</label>
-              <input value={form.level} onChange={(e) => update('level', e.target.value)} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Remaining sessions</label>
-              <input value={form.remainingSessions} onChange={(e) => update('remainingSessions', e.target.value === '' ? '' : Number(e.target.value))} type="number" min={0} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Progress (%)</label>
-              <input value={form.progress} onChange={(e) => update('progress', e.target.value === '' ? '' : Number(e.target.value))} type="number" min={0} max={100} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Notes</label>
-              <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" rows={3} />
+              <label className="block text-sm font-medium text-gray-700">Program &amp; Level</label>
+              <input value={form.level} onChange={(e) => update('level', e.target.value)} placeholder="e.g. ETA Tinies • Literacy Plus" className="mt-1 block w-full border border-gray-200 rounded px-3 py-2" />
             </div>
 
             <div className="flex justify-end">
-              <button type="submit" className="px-4 py-2 bg-mainBlue text-white rounded">{mode === 'edit' ? 'Save changes' : 'Create profile'}</button>
+              <button type="submit" className="px-4 py-2 bg-mainBlue text-white rounded">
+                {mode === 'edit' ? 'Save changes' : 'Create profile'}
+              </button>
             </div>
           </form>
         </div>
