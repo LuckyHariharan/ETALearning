@@ -2,9 +2,9 @@
   "name": "eta-learning-monorepo",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://luckyhariharan.github.io/ETALearning/",
+  
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "scripts": {
     "start": "npm --prefix eta-learning start",
