@@ -38,7 +38,7 @@ const Footer = () => {
                 ['Thursday', '4PM - 8PM'],
                 ['Friday', '4PM - 8PM'],
                 ['Saturday', '10AM - 2PM'],
-                ['Sunday', 'Closed'],
+                ['Sunday', 'By Appointment Only'],
               ].map(([day, hours]) => (
                 <div
                   key={day}

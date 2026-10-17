@@ -49,7 +49,7 @@ const FAQ: React.FC = () => {
 
   return (
     <section id="faq" className="bg-white py-20 px-4">
-      <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+      <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900">
         Frequently Asked Questions
       </h2>
       <div className="max-w-3xl mx-auto space-y-4">
@@ -60,9 +60,10 @@ const FAQ: React.FC = () => {
           >
             <button
               onClick={() => toggle(index)}
-              className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between p-5 min-h-[56px] text-left hover:bg-gray-50 transition-colors"
+              aria-expanded={openIndex === index}
             >
-              <span className="font-semibold text-gray-900 pr-4">{item.question}</span>
+              <span className="font-semibold text-gray-900 pr-4 text-base">{item.question}</span>
               <svg
                 className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`}
                 fill="none"

@@ -44,13 +44,48 @@ const programs = [
       'Fosters leadership, discipline, initiative, proactive study habits, curiosity, critical thinking, and test-taking skills',
     ],
   },
+  {
+    title: 'Test Prep',
+    age: 'High school & University (13+ years)',
+    points: [
+      'Targeted preparation for mid-school, high school, and university entrance/standardized exams',
+      'Exam-specific strategy, time management, and pressure-tested practice conditions',
+      'Diagnostic review to pinpoint gaps and focus study on highest-yield areas',
+      'Builds confidence and composure for high-stakes testing situations',
+    ],
+  },
+  {
+    title: 'Notetaking Skills',
+    age: 'High school & University (13+ years)',
+    points: [
+      'Structured note-taking frameworks for lectures, textbooks, and study groups',
+      'Develops efficient capture, organization, and review systems',
+      'Covers Cornell method, mind mapping, and active listening techniques',
+      'Prepares students for independent academic study in high school and university',
+    ],
+  },
+  {
+    title: 'Lecture Skills',
+    age: 'High school & University (13+ years)',
+    points: [
+      'Builds active listening, question formulation, and in-class engagement',
+      'Strengthens cross-examination and verbal response skills for mid-school and university exams',
+      'Develops academic vocabulary and professional communication',
+      'Supports confidence in oral examinations and presentations',
+    ],
+  },
 ];
 
 const Programs: React.FC = () => {
   return (
     <section className="bg-white py-20 px-4">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12 text-black">Programs</h2>
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-4xl font-bold text-center mb-12 text-black">
+          Programs
+          <span className="block mt-2 text-base font-medium text-gray-500">
+            Montessori foundations • Play-based • Cognitive-stage placement
+          </span>
+        </h2>
         <div className="space-y-12">
           {programs.map((prog, i) => (
             <div key={i} className="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-100">
@@ -59,7 +94,7 @@ const Programs: React.FC = () => {
               </h3>
               <ul className="mt-4 space-y-2">
                 {prog.points.map((point, j) => (
-                  <li key={j} className="flex items-start gap-3 text-gray-700">
+                  <li key={j} className="flex items-start gap-3 text-base md:text-lg text-gray-700">
                     <span className="text-mainBlue mt-1 flex-shrink-0">•</span>
                     <span>{point}</span>
                   </li>
@@ -68,7 +103,7 @@ const Programs: React.FC = () => {
             </div>
           ))}
         </div>
-        <p className="mt-10 text-center text-gray-600 text-sm">
+        <p className="mt-10 text-center text-base text-gray-600">
           Groups are based on formal cognitive stages of development rather than created age ranges. Since every child develops differently, placement within the program is flexible and tailored to each learner.
         </p>
       </div>

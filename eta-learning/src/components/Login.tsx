@@ -51,7 +51,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full py-3 bg-mainPink text-white rounded-md font-medium hover:bg-mainBlue"
+              className="w-full py-3.5 bg-mainPink text-white rounded-md font-medium hover:bg-mainBlue min-h-[48px] transition-colors"
             >
               Login
             </button>

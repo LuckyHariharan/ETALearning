@@ -56,12 +56,20 @@ const ChildModal: React.FC<ChildModalProps> = ({ open, onClose, onSubmit, initia
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-modal="true">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">{mode === 'edit' ? 'Edit child profile' : 'Create child profile'}</h3>
-            <button onClick={onClose} className="text-sm text-gray-500">Close</button>
+            <button
+              onClick={onClose}
+              aria-label="Close dialog"
+              className="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           <form onSubmit={submit} className="mt-4 space-y-3">

@@ -54,14 +54,18 @@ const Navbar = () => {
   return (
     <>
       <nav className="fixed top-0 w-full bg-white shadow-md h-20 px-4 md:px-6 flex items-center z-40 animate-slide-down">
-        <div className="flex items-center gap-3 h-full">
+        <button
+          onClick={() => goHome('home')}
+          aria-label="ETA Learning — Go to homepage"
+          className="flex items-center gap-3 h-full min-h-[44px] focus:outline-none rounded cursor-pointer"
+        >
           <img
             src={`${process.env.PUBLIC_URL}/Short.png`}
             alt="ETA logo"
-            className="h-10 md:h-12 w-auto"
+            className="h-14 md:h-20 w-auto"
           />
           <span className="sr-only">ETA Learning</span>
-        </div>
+        </button>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-4 ml-auto h-full">

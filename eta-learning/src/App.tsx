@@ -47,20 +47,20 @@ const App: React.FC = () => {
         <>
           <Hero onStart={() => goToLogin()} onQuestionnaire={() => setQuestionnaireOpen(true)} />
 
-          {/* Proof Strip */}
+          {/* Proof Strip — inverted triangle on sm+: 3 on top, 2 nestled in the gaps */}
           <section className="bg-mainBlue py-6 px-4">
-            <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-4 text-white text-sm font-medium">
-              <span>18 months–18 years+</span>
-              <span className="hidden sm:inline">•</span>
-              <span>3:1 student-to-tutor ratio</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Take-home materials included</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Parent portal</span>
-              <span className="hidden sm:inline">•</span>
-              <span>In-person tutoring</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Online tutoring (7+)</span>
+            <div className="max-w-6xl mx-auto flex flex-col items-center gap-y-4 text-center text-white text-base md:text-lg font-medium lg:text-xl lg:font-bold lg:gap-y-5">
+              {/* Top row — 3 evenly spaced (stacks on mobile) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 w-full gap-y-3 sm:gap-x-4 lg:gap-x-10">
+                <span className="px-2">18 months–18 years+</span>
+                <span className="px-2">3:1 student-to-tutor ratio</span>
+                <span className="px-2">Take-home materials included</span>
+              </div>
+              {/* Bottom row — 2 items, center-anchored below the gaps of the top 3 */}
+              <div className="w-full flex flex-col sm:flex-row md:flex-row items-center justify-center gap-x-24 md:gap-x-40 lg:gap-x-52 gap-y-3 sm:px-[16.67%] sm:mt-2">
+                <span className="px-2 flex-shrink-0 whitespace-nowrap">Parent portal</span>
+                <span className="px-2 flex-shrink-0 whitespace-nowrap">In-Person (all ages) + Online (7+)</span>
+              </div>
             </div>
           </section>
 

@@ -166,9 +166,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
             {onBack && (
               <button
                 onClick={onBack}
-                className="px-3 py-2 bg-white border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2.5 bg-white border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50 min-h-[44px]"
               >
-                Back
+                &larr; Back
               </button>
             )}
           </div>
@@ -192,7 +192,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                     </div>
                     <button
                       onClick={() => handleCancel(s)}
-                      className="flex-shrink-0 px-2.5 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                      className="flex-shrink-0 px-3 py-2 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors min-h-[44px] flex items-center"
                     >
                       Cancel
                     </button>
@@ -226,12 +226,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
               </a>
               .
             </p>
-            <a
-              href={`mailto:${paymentEmail}?subject=${encodeURIComponent('ETA Learning Payment')}`}
-              className="inline-block mt-4 px-3 py-2 bg-mainBlue text-white rounded text-sm hover:bg-mainBlue/80 transition-colors"
-            >
-              E-transfer to {paymentEmail}
-            </a>
           </div>
 
         </div>
@@ -336,16 +330,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
             {/* Tabs column */}
             <nav className="flex md:flex-col w-full md:w-1/4 border-b md:border-b-0 md:border-r border-gray-200 bg-gray-50">
               <button
-                className={`flex-1 md:flex-none px-4 py-3 text-left ${tab === 'kids' ? 'text-mainBlue font-medium bg-white md:bg-transparent' : 'text-gray-700 hover:bg-gray-100'}`}
+                className={`flex-1 md:flex-none px-4 py-3.5 text-left min-h-[48px] ${tab === 'kids' ? 'text-mainBlue font-medium bg-white md:bg-transparent border-b-2 border-mainBlue md:border-b-0' : 'text-gray-700 hover:bg-gray-100'}`}
                 onClick={() => setTab('kids')}
               >
                 My Kids
               </button>
               <button
-                className={`flex-1 md:flex-none px-4 py-3 text-left ${tab === 'programs' ? 'text-mainBlue font-medium bg-white md:bg-transparent' : 'text-gray-700 hover:bg-gray-100'}`}
+                className={`flex-1 md:flex-none px-4 py-3.5 text-left min-h-[48px] ${tab === 'programs' ? 'text-mainBlue font-medium bg-white md:bg-transparent border-b-2 border-mainBlue md:border-b-0' : 'text-gray-700 hover:bg-gray-100'}`}
                 onClick={() => setTab('programs')}
               >
-                Programs &amp; Plans
+                My Programs and Plans
               </button>
             </nav>
 
@@ -398,7 +392,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                             href="https://drive.google.com/drive/folders/1sbupL0dnyr51qcJRI5Npe5XcxM962a3L?usp=drive_link"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 text-center px-3 py-1.5 text-xs bg-mainPink text-white rounded hover:bg-pink-700 transition-colors"
+                            className="flex-1 text-center px-3 py-2 text-xs bg-mainPink text-white rounded hover:bg-pink-700 transition-colors min-h-[44px] flex items-center justify-center"
                           >
                             Study Materials
                           </a>
@@ -406,7 +400,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                             href="https://docs.google.com/document/d/1A-OyLANjBAY-J3PC20dpyGiOQUjvj5auMRxEous3xcg/edit?usp=sharing"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 text-center px-3 py-1.5 text-xs bg-mainBlue text-white rounded hover:bg-mainBlue/80 transition-colors"
+                            className="flex-1 text-center px-3 py-2 text-xs bg-mainBlue text-white rounded hover:bg-mainBlue/80 transition-colors min-h-[44px] flex items-center justify-center"
                           >
                             Session Report
                           </a>
@@ -428,7 +422,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                         <div>
                           <div className="mb-2">No profiles yet?</div>
                           {userRole === 'admin' ? (
-                            <button onClick={openCreateModal} className="px-3 py-2 bg-mainBlue text-white rounded text-sm">
+                            <button onClick={openCreateModal} className="px-4 py-3 bg-mainBlue text-white rounded text-sm min-h-[44px]">
                               Create a profile
                             </button>
                           ) : (
@@ -472,30 +466,35 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
               {tab === 'programs' && (
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Programs &amp; Plans</h3>
-                    <button className="text-sm text-mainBlue hover:underline">Browse all</button>
+                    <h3 className="text-lg font-semibold">My Programs and Plans</h3>
+                    <a
+                      href={`${process.env.PUBLIC_URL}/ETA Program Packages.pdf`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-mainBlue hover:underline"
+                    >
+                      Packages PDF
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5-5m5 5V6m0 5l-5 5" />
+                      </svg>
+                    </a>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[1, 2, 3].map((p) => (
-                      <div key={p} className="bg-gray-50 rounded-lg border border-gray-100 p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-12 h-12 bg-babyPink rounded-md flex items-center justify-center text-white font-semibold flex-shrink-0">
-                            P{p}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm text-gray-900">Program {p} — Early Literacy</div>
-                            <div className="text-xs text-gray-500 mt-1">Suitable for ages 4–6 &middot; 8 weeks</div>
-                            <div className="mt-3 flex gap-2">
-                              <button className="px-3 py-1 text-xs bg-mainBlue text-white rounded">View</button>
-                              {userRole === 'admin' && (
-                                <button className="px-3 py-1 text-xs border rounded">Enroll</button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  {/* Admin plan notes (per family) */}
+                  <div className="bg-gray-50 rounded-lg border border-gray-100 p-4 mb-4">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">My Plan</div>
+                    {userRole === 'admin' ? (
+                      <textarea
+                        rows={4}
+                        defaultValue={'My Plan: 20% Off - $385.00/12 sessions\n   12 sessions - Serena (2x/week Math+English)\n    4 sessions - Camilo (1x/week English)'}
+                        placeholder="Write the plan for this family here…"
+                        className="w-full text-sm text-gray-800 border border-gray-200 rounded p-3 h-32 resize-y focus:outline-none focus:ring-1 focus:ring-mainBlue"
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">
+                        Your plan will appear here once your instructor has reviewed your profile.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
