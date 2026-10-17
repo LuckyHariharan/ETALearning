@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Testimonial {
   name: string;
@@ -110,6 +110,9 @@ const testimonials: Testimonial[] = [
 ];
 
 const Testimonials: React.FC = () => {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? testimonials : testimonials.slice(0, 5);
+
   return (
     <section className="bg-gradient-to-b from-white to-blue-50 py-20 px-4">
       <div className="max-w-7xl mx-auto">
@@ -117,7 +120,7 @@ const Testimonials: React.FC = () => {
           What Parents Are Saying
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((item) => (
+          {visible.map((item) => (
             <div
               key={item.name}
               className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow flex flex-col"
@@ -157,6 +160,17 @@ const Testimonials: React.FC = () => {
             </div>
           ))}
         </div>
+        {/* Mobile/tablet: reveal the remaining cards under the fold */}
+        {!showAll && (
+          <div className="text-center mt-8 lg:hidden">
+            <button
+              onClick={() => setShowAll(true)}
+              className="inline-flex items-center justify-center rounded-full bg-mainBlue px-8 py-3.5 text-base font-semibold text-white transition duration-300 hover:bg-mainPink min-h-[48px]"
+            >
+              Show More Testimonials
+            </button>
+          </div>
+        )}
         <div className="text-center mt-10">
           <a
             href="https://www.google.com/maps/place/ETA+Learning/reviews"

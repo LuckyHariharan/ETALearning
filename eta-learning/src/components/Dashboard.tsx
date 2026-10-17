@@ -84,11 +84,35 @@ function Tally({ count }: { count: number }) {
   );
 }
 
+const PLAN_STORAGE_KEY = 'eta-my-plan';
+
+const DEFAULT_PLAN = 'My Plan: 20% Off - $385.00/12 sessions\n   12 sessions - Serena (2x/week Math+English)\n    4 sessions - Camilo (1x/week English)';
+
+function loadPlanText(): string {
+  try {
+    return window.localStorage.getItem(PLAN_STORAGE_KEY) ?? DEFAULT_PLAN;
+  } catch {
+    return DEFAULT_PLAN;
+  }
+}
+
 const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
   const [tab, setTab] = useState<TabKey>('kids');
   const [kids, setKids] = useState<Kid[]>(initialKids);
   const [showChildModal, setShowChildModal] = useState(false);
   const [editingKidId, setEditingKidId] = useState<number | null>(null);
+  const [planText, setPlanText] = useState(loadPlanText);
+  const [planSaved, setPlanSaved] = useState(false);
+
+  function savePlan() {
+    try {
+      window.localStorage.setItem(PLAN_STORAGE_KEY, planText);
+    } catch {
+      // storage unavailable — state still updates for the current session
+    }
+    setPlanSaved(true);
+    window.setTimeout(() => setPlanSaved(false), 2000);
+  }
 
   const upcomingPayment = { dueDate: '2026-09-28', amount: '$120.00' };
 
@@ -480,20 +504,34 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                     </a>
                   </div>
 
-                  {/* Admin plan notes (per family) */}
+                  {/* Plan notes — visible to all roles; only admin can edit/save */}
                   <div className="bg-gray-50 rounded-lg border border-gray-100 p-4 mb-4">
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">My Plan</div>
                     {userRole === 'admin' ? (
-                      <textarea
-                        rows={4}
-                        defaultValue={'My Plan: 20% Off - $385.00/12 sessions\n   12 sessions - Serena (2x/week Math+English)\n    4 sessions - Camilo (1x/week English)'}
-                        placeholder="Write the plan for this family here…"
-                        className="w-full text-sm text-gray-800 border border-gray-200 rounded p-3 h-32 resize-y focus:outline-none focus:ring-1 focus:ring-mainBlue"
-                      />
+                      <>
+                        <textarea
+                          rows={4}
+                          value={planText}
+                          onChange={(e) => setPlanText(e.target.value)}
+                          placeholder="Write the plan for this family here…"
+                          className="w-full text-sm text-gray-800 border border-gray-200 rounded p-3 h-32 resize-y whitespace-pre-line focus:outline-none focus:ring-1 focus:ring-mainBlue bg-white"
+                        />
+                        <div className="flex items-center gap-3 mt-3">
+                          <button
+                            onClick={savePlan}
+                            className="px-4 py-2 bg-mainBlue text-white rounded text-sm min-h-[44px] hover:bg-mainBlue/80 transition-colors"
+                          >
+                            Save
+                          </button>
+                          {planSaved && (
+                            <span className="text-sm text-green-600 font-medium">Saved</span>
+                          )}
+                        </div>
+                      </>
                     ) : (
-                      <p className="text-sm text-gray-500 italic">
-                        Your plan will appear here once your instructor has reviewed your profile.
-                      </p>
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 whitespace-pre-line text-sm text-gray-800 leading-relaxed min-h-[128px]">
+                        {planText.trim() ? planText : 'Your plan will appear here once your instructor has reviewed your profile.'}
+                      </div>
                     )}
                   </div>
                 </div>
