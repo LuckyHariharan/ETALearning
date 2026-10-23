@@ -1,73 +1,59 @@
-import { useState } from 'react';
-import ChildModal from './ChildModal';
-
-type ChildFormData = {
-  name: string;
-  age: number;
-  level?: string;
-  remainingSessions?: number;
-  homeworkStreak?: number;
-};
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 type TabKey = 'kids' | 'programs';
 
 interface DashboardProps {
   onBack?: () => void;
+  onSignOut: () => Promise<void>;
+  profileName: string | null;
   userRole?: 'admin' | 'parent' | undefined;
+  userId: string;
 }
 
 type Kid = {
-  id: number;
+  id: string;
   name: string;
-  age: number;
-  remainingSessions: number;
-  level: string;
+  age?: number | null;
+  remainingSessions?: number | null;
+  level?: string | null;
   homeworkStreak: number;
+  studyMaterialsUrl: string | null;
+  sessionReportUrl: string | null;
+  learningPlan: string;
 };
 
-const initialKids: Kid[] = [
-  {
-    id: 1,
-    name: 'Anika',
-    age: 6,
-    remainingSessions: 8,
-    level: 'ETA Tots • Montessori Foundations',
-    homeworkStreak: 3,
-  },
-  {
-    id: 2,
-    name: 'Rohan',
-    age: 8,
-    remainingSessions: 5,
-    level: 'ETA Tinies • Literacy Plus',
-    homeworkStreak: 7,
-  },
-];
-
-type Session = {
-  id: number;
-  childName: string;
-  day: string;
-  time: string;
-  tutor: string;
-  date: string;
-};
-
-const sampleSessions: Session[] = [
-  { id: 1, childName: 'Anika', day: 'Mon, Sep 21', time: '4:00 PM', tutor: 'Ms. Priya', date: '2026-09-21' },
-  { id: 2, childName: 'Rohan', day: 'Wed, Sep 23', time: '5:30 PM', tutor: 'Mr. Lee', date: '2026-09-23' },
-];
-
-const paymentEmail = 'acadyya@gmail.com';
-const adminEmail = 'acadyya@gmail.com';
-
-function formatDueDate(iso: string): string {
+function getTrustedGoogleLink(value: string | null): string | null {
+  if (!value) return null;
   try {
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    const url = new URL(value);
+    if (
+      url.protocol === 'https:' &&
+      (url.hostname === 'drive.google.com' || url.hostname === 'docs.google.com')
+    ) {
+      return url.toString();
+    }
   } catch {
-    return iso;
+    return null;
   }
+  return null;
+}
+
+function StudentResourceLink({ url, label, color }: { url: string | null; label: string; color: string }) {
+  const trustedUrl = getTrustedGoogleLink(url);
+  const className = `flex-1 text-center px-3 py-2 text-xs rounded min-h-[44px] flex items-center justify-center ${
+    trustedUrl ? `${color} text-white transition-colors` : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+  }`;
+
+  if (!trustedUrl) {
+    return <span className={className} aria-disabled="true" title="This link has not been added yet">{label}</span>;
+  }
+
+  return (
+    <a href={trustedUrl} target="_blank" rel="noopener noreferrer" className={className}>
+      {label}
+    </a>
+  );
 }
 
 function Tally({ count }: { count: number }) {
@@ -84,93 +70,55 @@ function Tally({ count }: { count: number }) {
   );
 }
 
-const PLAN_STORAGE_KEY = 'eta-my-plan';
-
-const DEFAULT_PLAN = 'My Plan: 20% Off - $385.00/12 sessions\n   12 sessions - Serena (2x/week Math+English)\n    4 sessions - Camilo (1x/week English)';
-
-function loadPlanText(): string {
-  try {
-    return window.localStorage.getItem(PLAN_STORAGE_KEY) ?? DEFAULT_PLAN;
-  } catch {
-    return DEFAULT_PLAN;
-  }
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onBack, onSignOut, profileName, userRole, userId }) => {
   const [tab, setTab] = useState<TabKey>('kids');
-  const [kids, setKids] = useState<Kid[]>(initialKids);
-  const [showChildModal, setShowChildModal] = useState(false);
-  const [editingKidId, setEditingKidId] = useState<number | null>(null);
-  const [planText, setPlanText] = useState(loadPlanText);
-  const [planSaved, setPlanSaved] = useState(false);
+  const [kids, setKids] = useState<Kid[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [studentsError, setStudentsError] = useState<string | null>(null);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
-  function savePlan() {
+  useEffect(() => {
+    let active = true;
+
+    const loadStudents = async () => {
+      const { data, error } = await supabase
+        .from('students')
+        .select('id, first_name, last_name, homework_streak, learning_plan, drive_url, drive_url_2')
+        .eq('parent_id', userId)
+        .order('first_name');
+
+      if (!active) return;
+      if (error) {
+        setStudentsError(`Unable to load student profiles: ${error.message}`);
+        setStudentsLoading(false);
+        return;
+      }
+
+      setKids((data || []).map((student) => ({
+        id: student.id,
+        name: [student.first_name, student.last_name].filter(Boolean).join(' '),
+        homeworkStreak: student.homework_streak,
+        studyMaterialsUrl: student.drive_url,
+        sessionReportUrl: student.drive_url_2,
+        learningPlan: student.learning_plan || '',
+      })));
+      setStudentsLoading(false);
+    };
+
+    void loadStudents();
+    return () => {
+      active = false;
+    };
+  }, [userId]);
+
+  const handleSignOut = async () => {
+    setSignOutError(null);
     try {
-      window.localStorage.setItem(PLAN_STORAGE_KEY, planText);
-    } catch {
-      // storage unavailable — state still updates for the current session
+      await onSignOut();
+    } catch (error) {
+      setSignOutError(error instanceof Error ? error.message : 'Unable to sign out. Please try again.');
     }
-    setPlanSaved(true);
-    window.setTimeout(() => setPlanSaved(false), 2000);
-  }
-
-  const upcomingPayment = { dueDate: '2026-09-28', amount: '$120.00' };
-
-  function addChild(payload: ChildFormData) {
-    setKids((prev) => {
-      const nextId = prev.length ? Math.max(...prev.map((k) => k.id)) + 1 : 1;
-      return [
-        ...prev,
-        {
-          id: nextId,
-          name: payload.name,
-          age: payload.age,
-          remainingSessions: payload.remainingSessions ?? 0,
-          level: payload.level ?? 'New learner',
-          homeworkStreak: payload.homeworkStreak ?? 0,
-        },
-      ];
-    });
-  }
-
-  function updateChild(id: number, payload: ChildFormData) {
-    setKids((prev) =>
-      prev.map((kid) =>
-        kid.id === id
-          ? {
-              ...kid,
-              name: payload.name,
-              age: payload.age,
-              remainingSessions: payload.remainingSessions ?? kid.remainingSessions,
-              level: payload.level ?? kid.level,
-            }
-          : kid
-      )
-    );
-  }
-
-  function openCreateModal() {
-    setEditingKidId(null);
-    setShowChildModal(true);
-  }
-
-  function openEditModal(kid: Kid) {
-    setEditingKidId(kid.id);
-    setShowChildModal(true);
-  }
-
-  function handleCancel(session: Session) {
-    const to = userRole === 'admin' ? adminEmail : paymentEmail;
-    const subject = 'Cancel ETA Session';
-    const body = `Please cancel ${session.childName}'s ETA session for ${session.day}.\n\nThank you.`;
-    const confirmMsg =
-      userRole === 'admin'
-        ? `Cancel ${session.childName}'s session on ${session.day}? This will send an email to ${to}.`
-        : `This will open your email client to send a cancellation notice to ETA.\n(You should cancel before 9:00 AM on the day of the session.)\n\nDo you want to continue?`;
-    if (window.confirm(confirmMsg)) {
-      window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }
-  }
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-6 bg-gray-50">
@@ -183,9 +131,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex flex-col text-right">
+            <div className="flex min-w-0 flex-col text-right">
               <span className="text-xs text-gray-500">Welcome back,</span>
-              <span className="font-medium">{userRole === 'admin' ? 'Admin' : 'Parent'}</span>
+              <span className="max-w-[40vw] truncate text-sm font-medium sm:max-w-none sm:text-base">
+                {profileName || (userRole === 'admin' ? 'Admin' : 'Parent')}
+              </span>
             </div>
             {onBack && (
               <button
@@ -195,158 +145,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                 &larr; Back
               </button>
             )}
+            <button
+              onClick={() => void handleSignOut()}
+              className="px-4 py-2.5 bg-white border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50 min-h-[44px]"
+            >
+              Sign out
+            </button>
           </div>
         </div>
-
-        {/* Summary cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-
-          {/* Next Session card */}
-          <div className="bg-white rounded-lg shadow-sm p-4 md:p-5">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Next Session</h4>
-            {sampleSessions.length > 0 ? (
-              <div className="space-y-3">
-                {sampleSessions.map((s) => (
-                  <div key={s.id} className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="font-medium text-sm text-gray-900">{s.childName}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">
-                        {s.day} &middot; {s.time} &middot; {s.tutor}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleCancel(s)}
-                      className="flex-shrink-0 px-3 py-2 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors min-h-[44px] flex items-center"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-400">No upcoming sessions.</p>
-            )}
-            <p className="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-400 leading-relaxed">
-              Click cancel to email ETA your cancellation notice. Cancellations made after 9:00 AM on the day of your session will be charged in full.
-            </p>
-          </div>
-
-          {/* Next Payment card */}
-          <div className="bg-white rounded-lg shadow-sm p-4 md:p-5">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Next Payment</h4>
-            <div className="text-1xl md:text-2xl font-semibold text-gray-900">{upcomingPayment.amount}</div>
-            <p className="text-sm text-gray-500 mt-1">
-              Payment Due: <span className="font-medium text-gray-700">{formatDueDate(upcomingPayment.dueDate)}</span>
-            </p>
-            <p className="text-xs text-gray-400 mt-3 leading-relaxed">
-              If you have questions about attendance or payment history, please refer to your{' '}
-              <a
-                href="https://docs.google.com/spreadsheets/d/1fG9EIasT_nH08zDhh0TY9D4CakZKupkkAlkPgwQ7NDM/edit?usp=sharing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-mainBlue hover:underline"
-              >
-                Account Sheet
-              </a>
-              .
-            </p>
-          </div>
-
-        </div>
-
-        {/* A+ Student Resources – public default data for A+ students */}
-        <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
-          {/* Section header */}
-          <div className="px-4 md:px-5 py-4 bg-gradient-to-r from-blue-50 to-pink-50 border-b border-gray-100">
-            <div className="flex items-center gap-2 mb-1">
-              <svg className="w-5 h-5 text-mainBlue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">A+ Student Resources</h3>
-              <span className="ml-auto text-[10px] font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Public – No Login Required</span>
-            </div>
-            <p className="text-xs text-gray-500">
-              Default data shared with all A+ students. Click any card to open in Google Drive.
-            </p>
-          </div>
-
-          {/* Resource cards */}
-          <div className="p-4 md:p-5 grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-
-            {/* Account Sheet */}
-            <a
-              href="https://docs.google.com/spreadsheets/d/1fG9EIasT_nH08zDhh0TY9D4CakZKupkkAlkPgwQ7NDM/edit?usp=sharing"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:border-mainBlue/40 hover:shadow-md transition-all"
-            >
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mb-3 group-hover:bg-green-200 transition-colors">
-                <svg className="w-5 h-5 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="font-semibold text-sm text-gray-900 group-hover:text-mainBlue transition-colors">Account Sheet</div>
-              <div className="text-xs text-gray-500 mt-1 leading-relaxed">
-                Session schedule, attendance &amp; payment history for your A+ student.
-              </div>
-              <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-green-700">
-                Open Spreadsheet
-                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5-5m5 5V6m0 5l-5 5" />
-                </svg>
-              </div>
-            </a>
-
-            {/* Student Report */}
-            <a
-              href="https://docs.google.com/document/d/1A-OyLANjBAY-J3PC20dpyGiOQUjvj5auMRxEous3xcg/edit?usp=sharing"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:border-mainBlue/40 hover:shadow-md transition-all"
-            >
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
-                <svg className="w-5 h-5 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="font-semibold text-sm text-gray-900 group-hover:text-mainBlue transition-colors">Student Report</div>
-              <div className="text-xs text-gray-500 mt-1 leading-relaxed">
-                Detailed progress report covering skills, behavior &amp; achievements.
-              </div>
-              <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-blue-700">
-                View Report
-                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5-5m5 5V6m0 5l-5 5" />
-                </svg>
-              </div>
-            </a>
-
-            {/* Study Materials */}
-            <a
-              href="https://drive.google.com/drive/folders/1sbupL0dnyr51qcJRI5Npe5XcxM962a3L?usp=drive_link"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:border-mainBlue/40 hover:shadow-md transition-all"
-            >
-              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mb-3 group-hover:bg-amber-200 transition-colors">
-                <svg className="w-5 h-5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v10a2 2 0 01-2 2H5z" />
-                </svg>
-              </div>
-              <div className="font-semibold text-sm text-gray-900 group-hover:text-mainBlue transition-colors">Study Materials</div>
-              <div className="text-xs text-gray-500 mt-1 leading-relaxed">
-                Homework worksheets, activity packs &amp; supplementary reading for A+ students.
-              </div>
-              <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-amber-700">
-                Browse Folder
-                <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5-5m5 5V6m0 5l-5 5" />
-                </svg>
-              </div>
-            </a>
-
-          </div>
-        </div>
+        {signOutError && <p role="alert" className="mb-4 text-sm text-red-700">{signOutError}</p>}
 
         {/* Tabs panel */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -373,15 +180,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">My Kids</h3>
-                    {userRole === 'admin' && (
-                      <button onClick={openCreateModal} className="text-sm text-mainBlue hover:underline">
-                        Add child
-                      </button>
-                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {kids.map((kid) => (
+                    {studentsLoading && <p role="status" className="text-sm text-gray-500">Loading student profiles…</p>}
+                    {studentsError && <p role="alert" className="sm:col-span-2 text-sm text-red-700">{studentsError}</p>}
+                    {!studentsLoading && !studentsError && kids.map((kid) => (
                       <div key={kid.id} className="bg-gray-50 rounded-lg border border-gray-100 p-4">
                         {/* Avatar + Name */}
                         <div className="flex items-center gap-3 mb-3">
@@ -390,20 +194,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                           </div>
                           <div className="min-w-0">
                             <div className="font-medium text-sm text-gray-900 truncate">{kid.name}</div>
-                            <div className="text-xs text-gray-500">{kid.age} yrs</div>
                           </div>
                         </div>
 
                         {/* Details */}
                         <div className="space-y-2 text-sm">
-                          <div>
-                            <div className="text-xs text-gray-500">Remaining Sessions</div>
-                            <div className="font-semibold text-gray-900">{kid.remainingSessions}</div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-gray-500">Program &amp; Level</div>
-                            <div className="font-medium text-gray-900">{kid.level}</div>
-                          </div>
+                          {kid.learningPlan && (
+                            <div>
+                              <div className="text-xs text-gray-500">Learning Plan</div>
+                              <div className="font-medium text-gray-900 whitespace-pre-line">{kid.learningPlan}</div>
+                            </div>
+                          )}
                           <div>
                             <div className="text-xs text-gray-500 mb-1.5">Homework Streak</div>
                             <Tally count={kid.homeworkStreak} />
@@ -412,78 +213,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
 
                         {/* Action buttons */}
                         <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100">
-                          <a
-                            href="https://drive.google.com/drive/folders/1sbupL0dnyr51qcJRI5Npe5XcxM962a3L?usp=drive_link"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 text-center px-3 py-2 text-xs bg-mainPink text-white rounded hover:bg-pink-700 transition-colors min-h-[44px] flex items-center justify-center"
-                          >
-                            Study Materials
-                          </a>
-                          <a
-                            href="https://docs.google.com/document/d/1A-OyLANjBAY-J3PC20dpyGiOQUjvj5auMRxEous3xcg/edit?usp=sharing"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 text-center px-3 py-2 text-xs bg-mainBlue text-white rounded hover:bg-mainBlue/80 transition-colors min-h-[44px] flex items-center justify-center"
-                          >
-                            Session Report
-                          </a>
-                          {userRole === 'admin' && (
-                            <button
-                              onClick={() => openEditModal(kid)}
-                              className="px-2 py-1.5 text-xs border rounded hover:bg-gray-100 transition-colors"
-                            >
-                              Edit
-                            </button>
-                          )}
+                          <StudentResourceLink url={kid.studyMaterialsUrl} label="Study Materials" color="bg-mainPink hover:bg-pink-700" />
+                          <StudentResourceLink url={kid.sessionReportUrl} label="Session Report" color="bg-mainBlue hover:bg-mainBlue/80" />
                         </div>
                       </div>
                     ))}
 
                     {/* Empty state card */}
-                    {kids.length === 0 && (
+                    {!studentsLoading && !studentsError && kids.length === 0 && (
                       <div className="sm:col-span-2 bg-white rounded-lg border border-dashed border-gray-200 flex items-center justify-center p-6 text-center text-gray-500">
-                        <div>
-                          <div className="mb-2">No profiles yet?</div>
-                          {userRole === 'admin' ? (
-                            <button onClick={openCreateModal} className="px-4 py-3 bg-mainBlue text-white rounded text-sm min-h-[44px]">
-                              Create a profile
-                            </button>
-                          ) : (
-                            <div className="text-xs text-gray-500">Contact admin to add a profile.</div>
-                          )}
-                        </div>
+                        <div className="text-xs text-gray-500">No student profiles are assigned to this account.</div>
                       </div>
                     )}
                   </div>
 
-                  <ChildModal
-                    open={showChildModal}
-                    onClose={() => {
-                      setShowChildModal(false);
-                      setEditingKidId(null);
-                    }}
-                    mode={editingKidId !== null ? 'edit' : 'create'}
-                    initialData={
-                      editingKidId !== null
-                        ? (() => {
-                            const k = kids.find((x) => x.id === editingKidId);
-                            return k
-                              ? { name: k.name, age: k.age, level: k.level, remainingSessions: k.remainingSessions }
-                              : null;
-                          })()
-                        : null
-                    }
-                    onSubmit={(c) => {
-                      if (editingKidId !== null) {
-                        updateChild(editingKidId, c);
-                      } else {
-                        addChild(c);
-                      }
-                      setShowChildModal(false);
-                      setEditingKidId(null);
-                    }}
-                  />
                 </div>
               )}
 
@@ -504,36 +247,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onBack, userRole }) => {
                     </a>
                   </div>
 
-                  {/* Plan notes — visible to all roles; only admin can edit/save */}
-                  <div className="bg-gray-50 rounded-lg border border-gray-100 p-4 mb-4">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">My Plan</div>
-                    {userRole === 'admin' ? (
-                      <>
-                        <textarea
-                          rows={4}
-                          value={planText}
-                          onChange={(e) => setPlanText(e.target.value)}
-                          placeholder="Write the plan for this family here…"
-                          className="w-full text-sm text-gray-800 border border-gray-200 rounded p-3 h-32 resize-y whitespace-pre-line focus:outline-none focus:ring-1 focus:ring-mainBlue bg-white"
-                        />
-                        <div className="flex items-center gap-3 mt-3">
-                          <button
-                            onClick={savePlan}
-                            className="px-4 py-2 bg-mainBlue text-white rounded text-sm min-h-[44px] hover:bg-mainBlue/80 transition-colors"
-                          >
-                            Save
-                          </button>
-                          {planSaved && (
-                            <span className="text-sm text-green-600 font-medium">Saved</span>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 whitespace-pre-line text-sm text-gray-800 leading-relaxed min-h-[128px]">
-                        {planText.trim() ? planText : 'Your plan will appear here once your instructor has reviewed your profile.'}
-                      </div>
-                    )}
-                  </div>
+                  {studentsLoading ? (
+                    <p role="status" className="text-sm text-gray-500">Loading student plans…</p>
+                  ) : studentsError ? (
+                    <p role="alert" className="text-sm text-red-700">{studentsError}</p>
+                  ) : kids.length ? (
+                    <div className="space-y-4">
+                      {kids.map((kid) => (
+                        <section key={kid.id} className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                          <h4 className="font-semibold text-gray-900">{kid.name}</h4>
+                          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-700">
+                            {kid.learningPlan || 'Your instructor will add a learning plan here.'}
+                          </p>
+                        </section>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">Student plans will appear here when profiles are assigned to this account.</p>
+                  )}
                 </div>
               )}
             </div>

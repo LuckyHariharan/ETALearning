@@ -1,18 +1,28 @@
 import { useState } from 'react';
 
 interface LoginProps {
-  onLogin: (role?: 'admin' | 'parent') => void;
+  onLogin: (email: string, password: string) => Promise<void>;
   onBack?: () => void;
+  error?: string | null;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onBack, error: authError }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const isAdmin = email.toLowerCase().includes('admin');
-    onLogin(isAdmin ? 'admin' : 'parent');
+    setError(null);
+    setSubmitting(true);
+    try {
+      await onLogin(email, password);
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : 'Unable to sign in. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -27,9 +37,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
 
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label htmlFor="login-email" className="block text-sm font-medium text-gray-700">Email</label>
             <input
+              id="login-email"
               type="email"
+              autoComplete="username"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full border border-gray-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-mainBlue"
@@ -38,9 +51,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label htmlFor="login-password" className="block text-sm font-medium text-gray-700">Password</label>
             <input
+              id="login-password"
               type="password"
+              autoComplete="current-password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full border border-gray-200 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-mainBlue"
@@ -48,28 +64,22 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
             />
           </div>
 
+          {(error || authError) && (
+            <p role="alert" className="text-sm text-red-700">
+              {error || authError}
+            </p>
+          )}
+
           <div className="pt-4">
             <button
               type="submit"
+              disabled={submitting}
               className="w-full py-3.5 bg-mainPink text-white rounded-md font-medium hover:bg-mainBlue min-h-[48px] transition-colors"
             >
-              Login
+              {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </div>
         </form>
-
-        <div className="mt-4 text-center">
-          <button className="font-semibold text-sm text-gray-900">Don't have an account? Sign up</button>
-        </div>
-
-        <div className="mt-2 text-center">
-          <button
-            onClick={() => onLogin()}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            Continue as guest
-          </button>
-        </div>
       </div>
     </div>
   );

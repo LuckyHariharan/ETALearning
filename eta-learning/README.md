@@ -44,3 +44,15 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Supabase parent portal
+
+The application uses Supabase Auth for sign-in and reads the authenticated user's `profiles` row and permitted `students` rows. The publishable key is intended for browser use; never put a Supabase secret or service-role key in this React application.
+
+1. Set `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_PUBLISHABLE_KEY` in `eta-learning/.env.local`. This file is ignored by Git. Restart the development server after changing it.
+2. In the Supabase SQL Editor, run [`supabase/setup.sql`](./supabase/setup.sql). It enables row-level security, allows users to read their own profiles, restricts parent student rows to `students.parent_id = auth.uid()`, and permits active admins to read all student rows.
+3. In Supabase Auth, make sure each account has a matching `profiles` row whose `id` equals the `auth.users.id` UUID, `full_name` is populated, `role` is `admin` or `parent`, and `is_active` is `true`. Assign the `admin` role only to the two intended administrator profiles.
+4. Set each student's `parent_id` to the signed-in profile/auth UUID. Populate `drive_url` with the study-materials URL and `drive_url_2` with the session-report URL. The dashboard explicitly filters by the signed-in user's UUID so it shows only rows assigned to that profile.
+5. Set or reset the account password in Supabase Auth, then run `npm start` from `eta-learning/` and sign in with the existing account. Do not put user passwords in source code or `.env.local`.
+
+The website only links to HTTPS URLs on `drive.google.com` or `docs.google.com`. Configure sharing on each Google Drive resource separately; database row-level security does not change Google Drive sharing permissions. Review any existing `SELECT` policies on `profiles` and `students`: permissive policies are combined with `OR`, so remove any legacy policy that grants broader access than intended.

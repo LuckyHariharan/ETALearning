@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import type { Session, User } from '@supabase/supabase-js';
 import Hero from './components/Hero';
 import Section from './components/Section';
 import Footer from './components/Footer';
@@ -12,17 +13,21 @@ import ImageModal from './components/ImageModal';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import ConstructionModal from './components/ConstructionModal';
+import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<'home' | 'login' | 'dashboard' | 'testimonials'>('home');
   const [userRole, setUserRole] = useState<'admin' | 'parent' | undefined>(undefined);
+  const [profileName, setProfileName] = useState<string | null>(null);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [constructionModalOpen, setConstructionModalOpen] = useState(true);
   const dismissConstructionModal = useCallback(() => setConstructionModalOpen(false), []);
 
-  // helper that Navbar uses to set route + role (small SPA helper)
+  // Navbar uses this small SPA helper to change routes.
   useEffect(() => {
-    (window as any).setAppRoute = (r: string, role?: 'admin' | 'parent') => {
-      if (role) setUserRole(role);
+    (window as any).setAppRoute = (r: string) => {
       if (r === 'home' || r === 'login' || r === 'dashboard' || r === 'testimonials') setRoute(r as any);
     };
     return () => {
@@ -31,16 +36,97 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    let sessionCheck = 0;
+
+    const syncSession = async (session: Session | null) => {
+      const check = ++sessionCheck;
+      if (!session) {
+        setAuthUser(null);
+        setUserRole(undefined);
+        setProfileName(null);
+        setAuthLoading(false);
+        setRoute((current) => current === 'dashboard' ? 'home' : current);
+        return;
+      }
+
+      setAuthLoading(true);
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('full_name, role, is_active')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (!active || check !== sessionCheck) return;
+        if (error) throw new Error(`Unable to load your ETA profile: ${error.message}`);
+        if (!profile || profile.is_active !== true || (profile.role !== 'admin' && profile.role !== 'parent')) {
+          throw new Error('This account does not have an active ETA profile. Please contact an administrator.');
+        }
+
+        setAuthUser(session.user);
+        setUserRole(profile.role);
+        setProfileName(profile.full_name);
+        setAuthError(null);
+        setRoute('dashboard');
+      } catch (error) {
+        if (!active || check !== sessionCheck) return;
+        setAuthUser(null);
+        setUserRole(undefined);
+        setProfileName(null);
+        setAuthError(error instanceof Error ? error.message : 'Unable to verify your ETA profile.');
+        setRoute('login');
+        const { error: signOutError } = await supabase.auth.signOut();
+        if (signOutError) {
+          setAuthError(`${error instanceof Error ? error.message : 'Unable to verify your ETA profile.'} Sign-out failed: ${signOutError.message}`);
+        }
+      } finally {
+        if (active && check === sessionCheck) setAuthLoading(false);
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      window.setTimeout(() => {
+        if (active) void syncSession(session);
+      }, 0);
+    });
+
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        setAuthError(`Unable to restore your Supabase session: ${error.message}`);
+        setAuthLoading(false);
+        return;
+      }
+      void syncSession(data.session);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     document.body.dataset.route = route;
   }, [route]);
 
-  const goToLogin = (role?: 'admin' | 'parent') => {
-    if (role) setUserRole(role);
+  useEffect(() => {
+    if (!authLoading && route === 'dashboard' && (!authUser || !userRole)) setRoute('login');
+  }, [authLoading, authUser, route, userRole]);
+
+  const goToLogin = () => {
+    setAuthError(null);
     setRoute('login');
   };
-  const goToDashboard = (role?: 'admin' | 'parent') => {
-    if (role) setUserRole(role);
-    setRoute('dashboard');
+  const signIn = async (email: string, password: string) => {
+    setAuthError(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw new Error(error.message);
+  };
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(error.message);
   };
   const goHome = () => setRoute('home');
   const goTestimonials = () => setRoute('testimonials');
@@ -139,9 +225,17 @@ const App: React.FC = () => {
         </>
       )}
 
-      {route === 'login' && <Login onLogin={goToDashboard} onBack={goHome} />}
+      {route === 'login' && <Login onLogin={signIn} onBack={goHome} error={authError} />}
 
-      {route === 'dashboard' && <Dashboard onBack={goHome} userRole={userRole} />}
+      {route === 'dashboard' && authUser && userRole && (
+        <Dashboard
+          onBack={goHome}
+          onSignOut={signOut}
+          userRole={userRole}
+          userId={authUser.id}
+          profileName={profileName}
+        />
+      )}
 
       {route === 'testimonials' && (
         <>
