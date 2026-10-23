@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const Navbar = () => {
+interface NavbarProps {
+  onAnchor?: (anchor: string) => void;
+  onTestimonials?: () => void;
+}
+
+const Navbar = ({ onAnchor, onTestimonials }: NavbarProps) => {
   const [open, setOpen] = useState(false);
 
   const goRoute = (r: string, role?: 'admin' | 'parent') => {
@@ -9,31 +14,44 @@ const Navbar = () => {
   };
 
   // Navigate to home route, then scroll to the given section anchor.
-  // If already on home, just scroll immediately.
   const goHome = (anchor: string) => {
     setOpen(false);
     const routeFn = (window as any).setAppRoute;
+    const onHome = document.body.dataset.route === 'home';
 
-    // Determine if we are already on the home route by checking the current
-    // document body for the Hero/Hero section which only renders on home.
-    const onHome = !!document.querySelector('[data-route="home"], #programs, #faq, #contact, #testimonials');
+    if (anchor === 'testimonials') {
+      if (onTestimonials) {
+        onTestimonials();
+        return;
+      }
+      if (onAnchor) {
+        onAnchor('testimonials');
+        return;
+      }
+      if (routeFn && !onHome) routeFn('home');
+    }
+
+    if (anchor === 'home') {
+      if (routeFn && !onHome) routeFn('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (onAnchor) {
+      // App-level goAnchor handles cross-route switching + scrolling.
+      onAnchor(anchor);
+      return;
+    }
 
     if (onHome) {
-      // Already on home – just scroll
       const el = document.getElementById(anchor);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      // Switch to home first, then scroll after React re-renders
       if (routeFn) routeFn('home');
-      // Wait two rAFs: first for state update, second for paint
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const el = document.getElementById(anchor);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       });
     }

@@ -1,6 +1,16 @@
 import React from 'react';
 
-const Footer = () => {
+const Footer: React.FC<{ onGo?: (anchor: string) => void; onTestimonials?: () => void; onContact?: () => void }> = ({ onGo, onTestimonials, onContact }) => {
+  const HOURS: [string, string][] = [
+    ['Monday', '4PM - 8PM'],
+    ['Tuesday', '4PM - 8PM'],
+    ['Wednesday', '4PM - 8PM'],
+    ['Thursday', '4PM - 8PM'],
+    ['Friday', '4PM - 8PM'],
+    ['Saturday', '10AM - 2PM'],
+    ['Sunday', 'Closed'],
+  ];
+
   return (
     <>
       {/* Location Section — matches design image */}
@@ -31,15 +41,13 @@ const Footer = () => {
 
             {/* Hours table */}
             <div className="text-sm text-black">
-              {[
-                ['Monday', '4PM - 8PM'],
-                ['Tuesday', '4PM - 8PM'],
-                ['Wednesday', '4PM - 8PM'],
-                ['Thursday', '4PM - 8PM'],
-                ['Friday', '4PM - 8PM'],
-                ['Saturday', '10AM - 2PM'],
-                ['Sunday', 'By Appointment Only'],
-              ].map(([day, hours]) => (
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold">Hours</span>
+                <span className="text-[11px] font-semibold bg-mainBlue/10 text-mainBlue px-2.5 py-1 rounded-full uppercase tracking-wide">
+                  By Appointment Only
+                </span>
+              </div>
+              {HOURS.map(([day, hours]) => (
                 <div
                   key={day}
                   className="flex justify-between py-1 border-b border-gray-200"
@@ -51,9 +59,14 @@ const Footer = () => {
             </div>
 
             <button
+              type="button"
               onClick={() => {
-                const contact = document.getElementById('contact');
-                if (contact) contact.scrollIntoView({ behavior: 'smooth' });
+                if (onContact) onContact();
+                else if (onGo) onGo('contact');
+                else {
+                  const contact = document.getElementById('contact');
+                  if (contact) contact.scrollIntoView({ behavior: 'smooth' });
+                }
               }}
               className="mt-6 bg-pink-600 text-white px-6 py-2.5 rounded hover:bg-mainBlue transition-colors self-start text-sm font-medium"
             >
@@ -78,12 +91,12 @@ const Footer = () => {
 
             {/* Center: Navigation links */}
             <nav className="flex flex-col md:items-center gap-2 text-sm">
-              <a href="#home" className="text-black hover:text-mainBlue transition-colors">Home</a>
-              <a href="#programs" className="text-black hover:text-mainBlue transition-colors">Programs</a>
-              <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=eta+learning" className="text-black hover:text-mainBlue transition-colors">Testimonials</a>
-              <a href="#faq" className="text-black hover:text-mainBlue transition-colors">FAQ</a>
-              <a href="#location" className="text-black hover:text-mainBlue transition-colors">Location</a>
-              <a href="#contact" className="text-black hover:text-mainBlue transition-colors">Contact Us</a>
+              <button type="button" onClick={() => (onGo ? onGo('home') : window.scrollTo({ top: 0, behavior: 'smooth' }))} className="text-black hover:text-mainBlue transition-colors">Home</button>
+              <button type="button" onClick={() => (onGo ? onGo('programs') : null)} className="text-black hover:text-mainBlue transition-colors">Programs</button>
+              <button type="button" onClick={() => (onTestimonials ? onTestimonials() : onGo ? onGo('testimonials') : null)} className="text-black hover:text-mainBlue transition-colors">Testimonials</button>
+              <button type="button" onClick={() => (onGo ? onGo('faq') : null)} className="text-black hover:text-mainBlue transition-colors">FAQ</button>
+              <button type="button" onClick={() => (onGo ? onGo('location') : null)} className="text-black hover:text-mainBlue transition-colors">Location</button>
+              <button type="button" onClick={() => (onContact ? onContact() : onGo ? onGo('contact') : null)} className="text-black hover:text-mainBlue transition-colors">Contact Us</button>
             </nav>
 
             {/* Right: Location + Social */}

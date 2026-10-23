@@ -12,6 +12,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ open, onClose }) => {
   const [timeline, setTimeline] = useState('');
   const [frequency, setFrequency] = useState('');
   const [support, setSupport] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   const toggleGoal = (g: string) => {
     setGoals(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]);
@@ -21,26 +22,29 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ open, onClose }) => {
   const prev = () => setStep(s => Math.max(s - 1, 0));
 
   const submit = () => {
-    const body = [
-      'ETA Learning — Parent Questionnaire',
-      '',
-      `Child's Name: ${childName}`,
-      `Primary Goals: ${goals.join(', ') || 'Not selected'}`,
-      `Timeline: ${timeline}`,
-      `Attendance Frequency: ${frequency}`,
-      `Home Support: ${support}`,
-      '',
-      'Program Placement (for your reference):',
-      'ETA Tots: 18 months–2 years',
-      'ETA Tinies: 2–7 years',
-      'ETA Tykes: 7–11 years',
-      'ETA Tweens/Teens: 11+ years',
-    ].join('\n');
-
-    const subject = encodeURIComponent('ETA Learning — Parent Questionnaire');
-    const encodedBody = encodeURIComponent(body);
-    window.location.href = `mailto:sepeghh@gmail.com?subject=${subject}&body=${encodedBody}`;
-    onClose();
+    if (status === 'sending') return;
+    setStatus('sending');
+    fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'questionnaire',
+        name: childName,
+        goals: goals.join(', ') || 'Not selected',
+        timeline,
+        frequency,
+        support,
+      }),
+    })
+      .then((r) => {
+        if (r.ok) {
+          setStatus('sent');
+          window.setTimeout(onClose, 1200);
+        } else {
+          setStatus('error');
+        }
+      })
+      .catch(() => setStatus('error'));
   };
 
   if (!open) return null;
@@ -191,6 +195,16 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ open, onClose }) => {
               <p className="mt-4 text-xs text-gray-500">
                 Programs are broken up based on Psychological Phases of Cognitive Development. We cannot move children into age categories beyond these boundaries. Programs are made to sufficiently challenge advanced learners in a holistic manner, while preparing them for their upcoming years.
               </p>
+              {status === 'sent' && (
+                <p className="mt-4 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                  Thanks! We got your questionnaire — we'll be in touch.
+                </p>
+              )}
+              {status === 'error' && (
+                <p className="mt-4 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                  Something went wrong — please email us directly at eta-learning@gmail.com.
+                </p>
+              )}
             </div>
           )}
 
@@ -207,8 +221,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ open, onClose }) => {
                 Next
               </button>
             ) : (
-              <button onClick={submit} className="px-6 py-2 bg-mainBlue text-white rounded hover:bg-blue-600 transition-colors">
-                Submit
+              <button onClick={submit} disabled={status === 'sending'} className="px-6 py-2 bg-mainBlue text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-60">
+                {status === 'sending' ? 'Sending…' : 'Submit'}
               </button>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Hero from './components/Hero';
 import Section from './components/Section';
 import Footer from './components/Footer';
@@ -11,21 +11,28 @@ import Questionnaire from './components/Questionnaire';
 import ImageModal from './components/ImageModal';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
+import ConstructionModal from './components/ConstructionModal';
 
 const App: React.FC = () => {
-  const [route, setRoute] = useState<'home' | 'login' | 'dashboard'>('home');
+  const [route, setRoute] = useState<'home' | 'login' | 'dashboard' | 'testimonials'>('home');
   const [userRole, setUserRole] = useState<'admin' | 'parent' | undefined>(undefined);
+  const [constructionModalOpen, setConstructionModalOpen] = useState(true);
+  const dismissConstructionModal = useCallback(() => setConstructionModalOpen(false), []);
 
   // helper that Navbar uses to set route + role (small SPA helper)
   useEffect(() => {
     (window as any).setAppRoute = (r: string, role?: 'admin' | 'parent') => {
       if (role) setUserRole(role);
-      if (r === 'home' || r === 'login' || r === 'dashboard') setRoute(r as any);
+      if (r === 'home' || r === 'login' || r === 'dashboard' || r === 'testimonials') setRoute(r as any);
     };
     return () => {
       try { delete (window as any).setAppRoute; } catch {}
     };
   }, []);
+
+  useEffect(() => {
+    document.body.dataset.route = route;
+  }, [route]);
 
   const goToLogin = (role?: 'admin' | 'parent') => {
     if (role) setUserRole(role);
@@ -36,12 +43,32 @@ const App: React.FC = () => {
     setRoute('dashboard');
   };
   const goHome = () => setRoute('home');
+  const goTestimonials = () => setRoute('testimonials');
+
+  // Scroll to an in-home section anchor; if on another route, switch to home first.
+  const goAnchor = (anchor: string) => {
+    const onHome = document.body.dataset.route === 'home';
+    const scroll = () => {
+      const el = document.getElementById(anchor);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    if (onHome) {
+      scroll();
+    } else {
+      setRoute('home');
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(scroll);
+      });
+    }
+  };
+
   const [questionnaireOpen, setQuestionnaireOpen] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
-      <Navbar />
+      <Navbar onAnchor={goAnchor} onTestimonials={goTestimonials} />
 
       {route === 'home' && (
         <>
@@ -108,6 +135,7 @@ const App: React.FC = () => {
           <div id="contact" className="mt-8">
             <Contact />
           </div>
+          <Footer onGo={goAnchor} onTestimonials={goTestimonials} onContact={() => goAnchor('contact')} />
         </>
       )}
 
@@ -115,7 +143,12 @@ const App: React.FC = () => {
 
       {route === 'dashboard' && <Dashboard onBack={goHome} userRole={userRole} />}
 
-      {route === 'home' && <Footer />}
+      {route === 'testimonials' && (
+        <>
+          <Testimonials variant="page" onBack={goHome} />
+          <Footer onGo={goAnchor} onTestimonials={goTestimonials} onContact={() => goAnchor('contact')} />
+        </>
+      )}
       <Questionnaire open={questionnaireOpen} onClose={() => setQuestionnaireOpen(false)} />
       {route === 'home' && (
         <ImageModal
@@ -124,6 +157,9 @@ const App: React.FC = () => {
           open={imageModalOpen}
           onClose={() => setImageModalOpen(false)}
         />
+      )}
+      {constructionModalOpen && (
+        <ConstructionModal onClose={dismissConstructionModal} />
       )}
     </div>
   );

@@ -7,11 +7,34 @@ const Contact: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [showThanks, setShowThanks] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Fake confirmation popup instead of mailto
-    setShowThanks(true);
+    if (sending) return;
+    setSending(true);
+    setError(false);
+    fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'contact',
+        name: [firstName, lastName].filter(Boolean).join(' '),
+        email,
+        phone,
+        message,
+      }),
+    })
+      .then((r) => {
+        setSending(false);
+        if (r.ok) setShowThanks(true);
+        else setError(true);
+      })
+      .catch(() => {
+        setSending(false);
+        setError(true);
+      });
   };
 
   return (
@@ -45,15 +68,28 @@ const Contact: React.FC = () => {
         </div>
 
         <div className="text-right">
-          <button type="submit" className="px-4 py-2 bg-mainPink text-white rounded">Submit</button>
+          <button
+            type="submit"
+            disabled={sending}
+            className="px-4 py-2 bg-mainPink text-white rounded disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {sending ? 'Sending…' : 'Submit'}
+          </button>
         </div>
+        {error && (
+          <p className="text-red-600 text-sm">
+            Please email us directly at eta-learning@gmail.com.
+          </p>
+        )}
       </form>
 
       {showThanks && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
             <h4 className="text-lg font-semibold mb-2">Thank you</h4>
-            <p className="text-sm text-gray-700 mb-4">Thank you for reaching out — we will get back to you. A confirmation email has been sent to you.</p>
+            <p className="text-sm text-gray-700 mb-4">
+              Your message was sent — we&apos;ll get back to you shortly.
+            </p>
             <div className="flex justify-center">
               <button onClick={() => setShowThanks(false)} className="px-4 py-2 bg-mainBlue text-white rounded">OK</button>
             </div>
