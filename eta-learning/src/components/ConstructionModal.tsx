@@ -6,6 +6,7 @@ interface ConstructionModalProps {
 
 const ConstructionModal = ({ onClose }: ConstructionModalProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -13,7 +14,27 @@ const ConstructionModal = ({ onClose }: ConstructionModalProps) => {
     closeButtonRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (event.key === 'Tab') {
+        const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusableElements?.length) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -29,6 +50,7 @@ const ConstructionModal = ({ onClose }: ConstructionModalProps) => {
         aria-labelledby="construction-modal-title"
         aria-describedby="construction-modal-description"
         aria-modal="true"
+        ref={dialogRef}
         className="relative my-auto grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl shadow-slate-950/30 lg:grid-cols-2"
         role="dialog"
       >
